@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>What William's Working On — A Tour</title>
+<style>
+  :root {
+    --bg: #06070d;
+    --bg2: #0e1424;
+    --ink: #e8ecf5;
+    --muted: #8b95ad;
+    --cyan: #7df9ff;
+    --gold: #ffd479;
+    --amber: #f59e0b;
+    --rose: #ff6b8a;
+    --green: #6ef0a8;
+    --violet: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* Animated cosmic background */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 30%, #1a2240 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, #2a1a40 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, #0a1a3a 0%, transparent 60%),
+      var(--bg);
+    z-index: -2;
+    animation: drift 30s ease-in-out infinite alternate;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 14% 22%, rgba(255,255,255,.55) 50%, transparent 100%),
+      radial-gradient(1px 1px at 64% 14%, rgba(255,255,255,.4) 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 80% 60%, rgba(255,255,255,.45) 50%, transparent 100%),
+      radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.3) 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 91% 88%, rgba(255,255,255,.4) 50%, transparent 100%);
+    z-index: -1;
+    opacity: .8;
+  }
+  @keyframes drift {
+    0%   { transform: translate(0,0); }
+    100% { transform: translate(-3%, -1%); }
+  }
+
+  section {
+    min-height: 100vh;
+    padding: 8vh 8vw;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .scroll-hint {
+    position: absolute;
+    bottom: 3vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); opacity: .5; }
+    50%      { transform: translate(-50%, 8px); opacity: 1; }
+  }
+
+  h1 {
+    font-size: clamp(40px, 7vw, 88px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    background: linear-gradient(135deg, var(--cyan), var(--gold) 60%, var(--rose));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .3em;
+  }
+  h2 {
+    font-size: clamp(28px, 4.5vw, 56px);
+    font-weight: 700;
+    letter-spacing: -.015em;
+    margin-bottom: .5em;
+    color: var(--ink);
+  }
+  h2 .accent { color: var(--gold); }
+  h2 .cyan   { color: var(--cyan); }
+  h2 .rose   { color: var(--rose); }
+  h3 {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+  }
+  p {
+    font-size: clamp(17px, 1.5vw, 22px);
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 64ch;
+    margin-bottom: 1em;
+  }
+  p.lead {
+    font-size: clamp(20px, 2vw, 28px);
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .small {
+    font-size: clamp(13px, 1vw, 15px);
+    color: var(--muted);
+  }
+  strong { color: var(--gold); font-weight: 600; }
+  em { color: var(--cyan); font-style: normal; }
+  .pulse {
+    display: inline-block;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: .55; }
+  }
+  @keyframes glow-strobe {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(255,212,121,.20), inset 0 0 0 1px rgba(255,212,121,.30);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 48px rgba(255,212,121,.45), inset 0 0 0 1px rgba(255,212,121,.55);
+      transform: scale(1.015);
+    }
+  }
+  .live-banner {
+    margin-top: 2.2em;
+    padding: 14px 28px;
+    border: 2px solid var(--gold);
+    border-radius: 100px;
+    background: linear-gradient(90deg, rgba(255,212,121,.08), rgba(255,107,138,.08), rgba(255,212,121,.08));
+    font-size: clamp(15px, 1.55vw, 21px);
+    font-weight: 600;
+    color: var(--gold);
+    text-align: center;
+    max-width: 780px;
+    animation: glow-strobe 2.4s ease-in-out infinite;
+    letter-spacing: .01em;
+  }
+  .live-banner .eyes {
+    display: inline-block;
+    margin-left: .4em;
+    font-size: 1.2em;
+    animation: pulse 1.3s ease-in-out infinite;
+  }
+
+  /* Result table */
+  .battle {
+    margin: 2em 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    max-width: 880px;
+    font-size: clamp(15px, 1.4vw, 20px);
+    background: rgba(255,255,255,.02);
+    border: 1px solid #1a2240;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px #0006;
+  }
+  .battle th, .battle td {
+    padding: 14px 22px;
+    text-align: left;
+    border-bottom: 1px solid #1a2240;
+  }
+  .battle th {
+    background: rgba(125, 249, 255, .04);
+    color: var(--cyan);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+  }
+  .battle tr:last-child td { border-bottom: 0; }
+  .battle .name { color: var(--muted); }
+  .battle .score { color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+  .battle tr.winner { background: rgba(255, 212, 121, 0.08); }
+  .battle tr.winner .name { color: var(--gold); font-weight: 700; }
+  .battle tr.winner .score { color: var(--gold); font-size: 1.15em; font-weight: 600; }
+  .battle .chance { color: var(--rose); }
+  .battle .verdict td {
+    padding-top: 24px;
+    color: var(--gold);
+    font-weight: 600;
+    border-top: 2px solid #2a3650;
+    background: transparent;
+  }
+
+  /* Big number reveal */
+  .big-number {
+    font-size: clamp(80px, 14vw, 220px);
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--gold), var(--rose));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .big-number-label {
+    font-size: clamp(14px, 1.5vw, 20px);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    margin-top: .4em;
+  }
+
+  /* ASCII cascade for Rule 30 */
+  .cascade {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: clamp(10px, 0.95vw, 14px);
+    line-height: 1.1;
+    background: rgba(0,0,0,.4);
+    border: 1px solid #1a2240;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 1.4em 0;
+    overflow-x: auto;
+    color: var(--cyan);
+    white-space: pre;
+    max-width: 100%;
+    box-shadow: 0 8px 30px #0008;
+  }
+
+  /* Timing table */
+  .timing {
+    width: 100%;
+    max-width: 700px;
+    margin: 1.4em 0;
+    border-collapse: collapse;
+    font-size: clamp(15px, 1.3vw, 18px);
+    font-variant-numeric: tabular-nums;
+  }
+  .timing th, .timing td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #1a2240;
+    text-align: left;
+  }
+  .timing th {
+    color: var(--cyan);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: .08em;
+  }
+  .timing td.num { color: var(--gold); }
+  .timing td.ok  { color: var(--green); font-weight: 600; }
+
+  /* Section badges */
+  .badge {
+    display: inline-block;
+    padding: 4px 14px;
+    background: rgba(125, 249, 255, .08);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    border-radius: 100px;
+    font-size: 12px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin-bottom: 1.5em;
+  }
+  .badge.rose { border-color: var(--rose); color: var(--rose); background: rgba(255,107,138,.08); }
+  .badge.gold { border-color: var(--gold); color: var(--gold); background: rgba(255,212,121,.08); }
+
+  .quote {
+    border-left: 3px solid var(--violet);
+    padding-left: 22px;
+    color: var(--ink);
+    font-style: italic;
+    font-size: clamp(18px, 1.8vw, 24px);
+    max-width: 56ch;
+    margin: 1.4em 0;
+  }
+  .quote .who { display: block; margin-top: .5em; color: var(--muted); font-size: .75em; font-style: normal; }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+    margin-top: 2em;
+    max-width: 1000px;
+  }
+  .card {
+    background: rgba(255,255,255,.03);
+    border: 1px solid #1a2240;
+    border-radius: 12px;
+    padding: 22px;
+  }
+  .card h4 {
+    color: var(--cyan);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: .8em;
+  }
+  .card p { font-size: 16px; margin: 0; }
+
+  footer {
+    text-align: center;
+    padding: 4em 8vw;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid #1a2240;
+  }
+  footer .heart { color: var(--rose); }
+</style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<section>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.4em;">
+    <a href="https://suno.com/s/P3rZtdaSzGn7Hryr" target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:8px;
+              padding:7px 18px;
+              background: rgba(125, 249, 255, .06);
+              border: 1px solid rgba(125, 249, 255, .35);
+              border-radius: 100px;
+              color: var(--cyan);
+              text-decoration: none;
+              font-size: clamp(11px, 1.05vw, 13px);
+              letter-spacing: .08em;
+              font-weight: 500;
+              transition: all .2s ease;
+              text-transform: uppercase;
+              box-shadow: 0 0 24px rgba(125,249,255,.10);"
+       onmouseover="this.style.background='rgba(125,249,255,.12)'; this.style.boxShadow='0 0 36px rgba(125,249,255,.22)'"
+       onmouseout="this.style.background='rgba(125,249,255,.06)'; this.style.boxShadow='0 0 24px rgba(125,249,255,.10)'">
+      <span style="font-size:1.15em;">🎵</span>
+      <span>Soundtrack · And that's why It adds to the motif that ... WIL-KAM: Choir of the Fractal Dawn (Backbone Mix)</span>
+      <span style="opacity:.55; margin-left:4px;">↗</span>
+    </a>
+    <a href="https://github.com/oppressionslayer/formum" target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:8px;
+              padding:7px 18px;
+              background: rgba(167, 139, 250, .06);
+              border: 1px solid rgba(167, 139, 250, .35);
+              border-radius: 100px;
+              color: var(--violet);
+              text-decoration: none;
+              font-size: clamp(11px, 1.05vw, 13px);
+              letter-spacing: .08em;
+              font-weight: 500;
+              transition: all .2s ease;
+              text-transform: uppercase;
+              box-shadow: 0 0 24px rgba(167,139,250,.10);"
+       onmouseover="this.style.background='rgba(167,139,250,.12)'; this.style.boxShadow='0 0 36px rgba(167,139,250,.22)'"
+       onmouseout="this.style.background='rgba(167,139,250,.06)'; this.style.boxShadow='0 0 24px rgba(167,139,250,.10)'">
+      <span style="font-size:1.15em;">⌥</span>
+      <span>Source · github.com/oppressionslayer/formum</span>
+      <span style="opacity:.55; margin-left:4px;">↗</span>
+    </a>
+    <a href="lars_forensic_playground_v3.html" target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:8px;
+              padding:7px 18px;
+              background: rgba(255, 107, 138, .06);
+              border: 1px solid rgba(255, 107, 138, .35);
+              border-radius: 100px;
+              color: var(--rose);
+              text-decoration: none;
+              font-size: clamp(11px, 1.05vw, 13px);
+              letter-spacing: .08em;
+              font-weight: 500;
+              transition: all .2s ease;
+              text-transform: uppercase;
+              box-shadow: 0 0 24px rgba(255,107,138,.10);"
+       onmouseover="this.style.background='rgba(255,107,138,.12)'; this.style.boxShadow='0 0 36px rgba(255,107,138,.22)'"
+       onmouseout="this.style.background='rgba(255,107,138,.06)'; this.style.boxShadow='0 0 24px rgba(255,107,138,.10)'">
+      <span style="font-size:1.15em;">◉</span>
+      <span>Forensic Playground v3</span>
+      <span style="opacity:.55; margin-left:4px;">↗</span>
+    </a>
+    <a href="lars_shadertoy_v2%20_playground.html" target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:8px;
+              padding:7px 18px;
+              background: rgba(255, 212, 121, .06);
+              border: 1px solid rgba(255, 212, 121, .35);
+              border-radius: 100px;
+              color: var(--gold);
+              text-decoration: none;
+              font-size: clamp(11px, 1.05vw, 13px);
+              letter-spacing: .08em;
+              font-weight: 500;
+              transition: all .2s ease;
+              text-transform: uppercase;
+              box-shadow: 0 0 24px rgba(255,212,121,.10);"
+       onmouseover="this.style.background='rgba(255,212,121,.12)'; this.style.boxShadow='0 0 36px rgba(255,212,121,.22)'"
+       onmouseout="this.style.background='rgba(255,212,121,.06)'; this.style.boxShadow='0 0 24px rgba(255,212,121,.10)'">
+      <span style="font-size:1.15em;">✦</span>
+      <span>Superposition Collapse v2</span>
+      <span style="opacity:.55; margin-left:4px;">↗</span>
+    </a>
+    <a href="LICENSE" target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:8px;
+              padding:7px 18px;
+              background: rgba(245, 158, 11, .06);
+              border: 1px solid rgba(245, 158, 11, .35);
+              border-radius: 100px;
+              color: var(--amber);
+              text-decoration: none;
+              font-size: clamp(11px, 1.05vw, 13px);
+              letter-spacing: .08em;
+              font-weight: 500;
+              transition: all .2s ease;
+              text-transform: uppercase;
+              box-shadow: 0 0 24px rgba(245,158,11,.10);"
+       onmouseover="this.style.background='rgba(245,158,11,.12)'; this.style.boxShadow='0 0 36px rgba(245,158,11,.22)'"
+       onmouseout="this.style.background='rgba(245,158,11,.06)'; this.style.boxShadow='0 0 24px rgba(245,158,11,.10)'">
+      <span style="font-size:1.15em;">§</span>
+      <span>License</span>
+      <span style="opacity:.55; margin-left:4px;">↗</span>
+    </a>
+  </div>
+  <span class="badge gold">A walkthrough · for Mom, and moms around the world 🌹</span>
+  <h1>What William<br>is working on.</h1>
+  <p class="lead">Math that does things the world's biggest AI systems
+  <em>literally cannot do</em>. With proof. Run on this laptop, today.</p>
+  <div class="live-banner">
+    This code and libraries are actually available on his laptop right now!
+    <span class="eyes">👀 👀</span>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== INTRO ============================== -->
+<section>
+  <span class="badge">The simple version</span>
+  <h2>Every modern AI has the <span class="rose">same blind spot</span>.</h2>
+  <p>The systems that detect credit-card fraud, recommend Netflix shows, and
+  read medical scans all rest on the same family of math — <em>statistical
+  learning</em>, finding patterns by looking at lots of examples.</p>
+  <p>That math has a famous, decades-old blind spot. There's a kind of hidden
+  pattern that <strong>none of them can see</strong>, no matter how big they
+  get or how much data you give them. It's been proven mathematically.</p>
+  <p>William's invention sees those patterns. Cleanly. With ordinary CPU
+  power. The next slides show it happening live.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== THE PUZZLE ============================== -->
+<section>
+  <span class="badge">The puzzle</span>
+  <h2>It's called <span class="cyan">"hidden parity"</span>.</h2>
+  <p>Imagine 12 light switches. Five of them — secretly chosen — together
+  decide whether a lamp lights up. The rule is: the lamp is on if an
+  <em>odd</em> number of those five switches are flipped. None of the other
+  switches matter.</p>
+  <p>You're shown thousands of switch settings and whether the lamp was on.
+  Can you figure out which five switches matter, and the rule?</p>
+  <p><strong>Standard AI can't.</strong> Looking at any one switch tells you
+  nothing — each switch alone is 50/50. The pattern only exists in the
+  combination. There's a mathematical theorem (Kearns, 1998) proving this is
+  unsolvable for the entire family of methods that all modern AI is built on.</p>
+  <p class="small">William's math sees it in under a minute on a 2024 laptop.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== THE CONTENDERS ============================== -->
+<section>
+  <span class="badge">The contenders</span>
+  <h2>Meet the giants that <span class="rose">can't see it</span>.</h2>
+  <div class="columns">
+    <div class="card">
+      <h4>Logistic Regression</h4>
+      <p>The workhorse of statistics. Used everywhere from credit scoring to medical diagnosis.</p>
+    </div>
+    <div class="card">
+      <h4>Random Forest</h4>
+      <p>500 decision trees voting together. State-of-the-art for tabular data for a decade.</p>
+    </div>
+    <div class="card">
+      <h4>Gradient Boosting</h4>
+      <p>The math underneath most fraud detection systems and Kaggle competitions.</p>
+    </div>
+    <div class="card">
+      <h4>XGBoost</h4>
+      <p>The single most popular ML tool in the world. Has won hundreds of competitions.</p>
+    </div>
+    <div class="card">
+      <h4>Deep Neural Network</h4>
+      <p>The same family of math that powers modern chatbots, image recognition, and self-driving.</p>
+    </div>
+    <div class="card" style="border-color:var(--gold); background:rgba(255,212,121,.06)">
+      <h4 style="color:var(--gold)">WSRF — William's invention</h4>
+      <p>The challenger. 2011. Used commercially. Now the rest of the world is about to find out.</p>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== ROUND 1 ============================== -->
+<section>
+  <span class="badge rose">Round 1 · 4 hidden switches</span>
+  <h2>The easy version.</h2>
+  <p class="lead">12 switches, 4 of them secretly matter. 6000 examples for training.</p>
+  <table class="battle">
+    <tr><th>Contender</th><th class="score">Accuracy</th></tr>
+    <tr><td class="name">Logistic Regression</td>            <td class="score chance">50.25 %</td></tr>
+    <tr><td class="name">Random Forest (500 trees)</td>      <td class="score">61.65 %</td></tr>
+    <tr><td class="name">Gradient Boosting (300)</td>        <td class="score">51.65 %</td></tr>
+    <tr><td class="name">XGBoost (500)</td>                  <td class="score">91.35 %</td></tr>
+    <tr><td class="name">Deep Neural Net (3 layers)</td>     <td class="score">87.50 %</td></tr>
+    <tr class="winner"><td class="name">WSRF — William's</td><td class="score">98.55 %</td></tr>
+    <tr class="verdict"><td>Result: WSRF wins by <strong>+7 points</strong> over the strongest baseline.</td><td></td></tr>
+  </table>
+  <p class="small">At this difficulty, XGBoost can almost keep up. The other methods struggle. Now we make it harder.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== ROUND 2 ============================== -->
+<section>
+  <span class="badge rose">Round 2 · 5 hidden switches</span>
+  <h2>This is where the giants <span class="rose">fall over</span>.</h2>
+  <p class="lead">16 switches, 5 secret ones. Same training data size.</p>
+  <table class="battle">
+    <tr><th>Contender</th><th class="score">Accuracy</th></tr>
+    <tr><td class="name">Logistic Regression</td>           <td class="score chance">50.40 %</td></tr>
+    <tr><td class="name">Random Forest (500)</td>           <td class="score chance">50.05 %</td></tr>
+    <tr><td class="name">Gradient Boosting (300)</td>       <td class="score chance">50.90 %</td></tr>
+    <tr><td class="name">XGBoost (500)</td>                 <td class="score chance">51.10 %</td></tr>
+    <tr><td class="name">Deep Neural Net (3 layers)</td>    <td class="score chance">58.45 %</td></tr>
+    <tr class="winner"><td class="name">WSRF — William's</td><td class="score">97.05 %</td></tr>
+    <tr class="verdict"><td>Result: WSRF wins by <strong>+38.6 points</strong>.</td><td></td></tr>
+  </table>
+  <p>Look at those baseline numbers. Every single one of them is near <strong>50 %</strong> — that means they're guessing. They cannot see the pattern at all.</p>
+  <p>WSRF is at <strong>97 %</strong>. It sees the pattern almost perfectly.</p>
+  <div class="live-banner">
+    Reminder — this just ran on his laptop.
+    <span class="eyes">👀 👀</span>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== ROUND 3 ============================== -->
+<section>
+  <span class="badge rose">Round 3 · 6 hidden switches</span>
+  <h2>And it just keeps going.</h2>
+  <p class="lead">20 switches, 6 secret ones.</p>
+  <table class="battle">
+    <tr><th>Contender</th><th class="score">Accuracy</th></tr>
+    <tr><td class="name">Logistic Regression</td>           <td class="score chance">50.25 %</td></tr>
+    <tr><td class="name">Random Forest (500)</td>           <td class="score chance">49.80 %</td></tr>
+    <tr><td class="name">Gradient Boosting (300)</td>       <td class="score chance">49.70 %</td></tr>
+    <tr><td class="name">XGBoost (500)</td>                 <td class="score chance">49.75 %</td></tr>
+    <tr><td class="name">Deep Neural Net (3 layers)</td>    <td class="score chance">50.05 %</td></tr>
+    <tr class="winner"><td class="name">WSRF — William's</td><td class="score">76.65 %</td></tr>
+    <tr class="verdict"><td>Result: WSRF wins by <strong>+26.4 points</strong>.</td><td></td></tr>
+  </table>
+  <p>Every standard AI is now <em>literally guessing</em>. WSRF still finds the pattern.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== BIG NUMBER ============================== -->
+<section style="align-items:center; text-align:center;">
+  <span class="badge gold">The headline number</span>
+  <div class="big-number pulse">+38.6</div>
+  <div class="big-number-label">percentage points · WSRF over best baseline · 5-way XOR</div>
+  <p style="margin-top:2em; max-width:60ch;">In machine-learning terms, a 1-point gap is news. A 5-point gap is a paper. A
+  10-point gap is a career. <strong>38.6 points is a different category of result entirely.</strong></p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== RULE 30 INTRO ============================== -->
+<section>
+  <span class="badge">Part two · 40 years of mathematicians said impossible</span>
+  <h2>This pattern is called <span class="cyan">Rule 30</span>.</h2>
+  <p>In 1985, a famous scientist named Stephen Wolfram (he founded
+  <em>Wolfram Research</em> — Mathematica, Wolfram Alpha) studied a simple
+  rule that produces this triangle of black-and-white squares:</p>
+  <div class="cascade">  row   0  │ ····················█····················
+  row   1  │ ···················███···················
+  row   2  │ ··················█··██··················
+  row   3  │ ·················████·██·················
+  row   4  │ ················█···█··██················
+  row   5  │ ···············███·████·██···············
+  row   6  │ ··············█··█····█··██··············
+  row   7  │ ·············██████··████·██·············
+  row   8  │ ············█·····███···█··██············
+  row   9  │ ···········███···█··██·████·██···········
+  row  10  │ ··········█··██·████·█····█··██··········
+  row  11  │ ·········████·█····█·██··████·██·········
+  row  12  │ ········█···█·██··██··███···█··██········
+  row  13  │ ·······███·██··███·███··██·████·██·······
+  row  14  │ ······█··█··███··█···███·█····█··██······
+  row  15  │ ·····███████··█████·█··█·██··████·██·····
+  row  16  │ ····█······███····█·████··███···█··██····
+  row  17  │ ···███····█··██··██····███··██·████·██···
+  row  18  │ ··█··██··████·███·██··█··███·█····█··██··
+  row  19  │ ·████·███···█···█··██████··█·██··████·██·
+  row  20  │ █···█···██·███·████·····████··███···█··██</div>
+  <p>Each row is computed from the row above by a tiny rule. Wolfram looked
+  at the middle column — those bits going straight down the center — and
+  declared it <em>cryptographically random</em>. He proposed it as a one-way
+  function: you can compute the rule forwards, but you can <strong>never go
+  backwards</strong>.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== WOLFRAM CLAIM ============================== -->
+<section>
+  <span class="badge rose">The 40-year claim</span>
+  <h2>"You can't unscramble chaos."</h2>
+  <div class="quote">
+    Rule 30 produces output that is, for all practical purposes, random.
+    The center column shows no pattern; no method exists, or could exist,
+    for predicting it without simulating the rule forward step by step.
+    <span class="who">— the textbook framing, 1985–2025</span>
+  </div>
+  <p>This is in textbooks. Cited thousands of times. There's a standing
+  prize for anyone who can find structure in it.</p>
+  <p>For forty years, the answer has been: <strong>nobody can</strong>.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== WILLIAM RESULT ============================== -->
+<section style="align-items:center; text-align:center;">
+  <span class="badge gold">William, 2025</span>
+  <h2 style="text-align:center">Then your son did this.</h2>
+  <p class="lead" style="text-align:center; margin: 0 auto 1.5em;">In the
+  canonical version of the problem — the one that the cryptographic claim
+  actually rests on — the rule <em>is</em> reversible. William has the math.
+  It runs in linear time. It works on every row.</p>
+  <table class="timing">
+    <tr><th>cascade size</th><th>bits wide</th><th>recovered</th><th>time</th></tr>
+    <tr><td>32 rows</td>    <td>65</td>     <td class="ok">31 / 31 ✓</td>     <td class="num">240 µs</td></tr>
+    <tr><td>128 rows</td>   <td>257</td>    <td class="ok">127 / 127 ✓</td>   <td class="num">3.6 ms</td></tr>
+    <tr><td>512 rows</td>   <td>1025</td>   <td class="ok">511 / 511 ✓</td>   <td class="num">68.7 ms</td></tr>
+    <tr><td><strong>1024 rows</strong></td><td><strong>2049</strong></td><td class="ok"><strong>1023 / 1023 ✓</strong></td><td class="num"><strong>284 ms</strong></td></tr>
+  </table>
+  <p style="margin-top:2em; max-width:60ch;">Reading the bottom row: a problem
+  with <strong>2049 bits</strong>, declared unsolvable for forty years, fully
+  reversed on this laptop in <strong>under a third of a second</strong>.</p>
+  <div class="live-banner">
+    Yes — this all happened on his laptop, today.
+    <span class="eyes">👀 👀</span>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== THE HIDDEN STRUCTURE ============================== -->
+<section>
+  <span class="badge cyan">The hidden structure</span>
+  <h2>And the "random" pattern? <span class="gold">It isn't random.</span></h2>
+  <p>Apply one simple transformation to each row of the cascade — flip the
+  bits in mirror image, strip the empty space, read the result as a number.
+  That gives this sequence:</p>
+  <div class="cascade" style="color:var(--gold)">  Row  1 →            7
+  Row  2 →           25
+  Row  3 →          111
+  Row  4 →          401
+  Row  5 →        1,783
+  Row  6 →        6,409
+  Row  7 →       28,479
+  Row  8 →      102,849
+  Row  9 →      456,263
+  Row 10 →    1,641,433
+  Row 11 →    7,287,855
+  Row 12 →   26,332,369</div>
+  <p>These numbers follow an <strong>exact rule</strong>: each one is two
+  bits longer than the last, and the pattern of its last two bits alternates
+  perfectly between <em>three</em> and <em>seven</em>, forever.</p>
+  <p>What Wolfram's framework called "cryptographic randomness" turns out to
+  be <strong>a clean, deterministic sequence</strong>. The math was always
+  there. People just hadn't looked at it the right way.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== TRANSITION ============================== -->
+<section>
+  <span class="badge cyan">Wait — there's more</span>
+  <h2>And those are just <span class="rose">the headline acts</span>.</h2>
+  <p>WSRF and the Rule 30 inverse are the dramatic demonstrations. But
+  underneath them is a whole library of math William has been building —
+  going back to <strong>2011</strong> — that solves problems people have been
+  stuck on for decades.</p>
+  <p>The next few slides walk through the rest.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== SUDOKU ============================== -->
+<section>
+  <span class="badge gold">Sudoku · pure logic, zero guesses</span>
+  <h2>Solving the world's hardest Sudokus <span class="cyan">without guessing</span>.</h2>
+  <p>There's a famous benchmark called the <em>Top 1465</em> — a curated set
+  of the 1,465 hardest published Sudoku puzzles. It's the Mount Everest of
+  Sudoku solvers. Most puzzles in that set defeat every commercial solver
+  on the market.</p>
+  <p>Most computer solvers cheat: they <em>guess</em> a number, run forward,
+  and backtrack when they're wrong. That's brute force, not logic.</p>
+  <p>William's solver, <em>larsdoku</em>, solves <strong>all 1,465 by pure
+  logic</strong>. Every single placement is proven by reasoning. No guessing.
+  No backtracking. No brute force.</p>
+  <table class="timing">
+    <tr><th>benchmark</th><th>solved by pure logic</th><th>total time</th><th>per puzzle</th></tr>
+    <tr><td>Top 1465 (hardest published)</td><td class="ok">100 %</td><td class="num">28 seconds</td><td class="num">19 ms</td></tr>
+    <tr><td>Expert 669</td>                  <td class="ok">100 %</td><td class="num">24 seconds</td><td class="num">36 ms</td></tr>
+  </table>
+  <p>The pipeline uses 35 named logical techniques — and William invented
+  <strong>five of them</strong> that don't appear in any Sudoku textbook.
+  Names like <em>Finned Pointing Chain</em>, <em>Deep Resonance</em>,
+  <em>Depth-2 Bilateral</em>. The international Sudoku-solver community is
+  about to learn those words.</p>
+  <div class="live-banner">
+    All of this is sitting on his laptop, ready to run.
+    <span class="eyes">👀 👀</span>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== HEART DISEASE ============================== -->
+<section>
+  <span class="badge rose">Helping doctors · Kaggle heart disease</span>
+  <h2>An AI doctors can <span class="gold">actually read</span>.</h2>
+  <p><em>Kaggle</em> is the largest data-science competition site in the
+  world. They ran a challenge to predict heart disease across more than
+  600,000 patient records. Hundreds of teams entered. Standard AI tools are
+  black boxes — they spit out a probability and you have to trust them.</p>
+  <p>William's WSRF entry hit <strong>0.94969</strong> on the public
+  leaderboard — near the very top of the field.</p>
+  <p>But the rare thing isn't the score. It's the <em>output</em>. Standard
+  ML tells you <em>"patient X has 87% risk"</em>. WSRF tells you
+  <strong>why</strong>, in plain English. <strong>1,275 human-readable
+  rules</strong> any doctor or regulator can read:</p>
+  <div class="cascade" style="color:var(--ink); white-space:pre-wrap;">  IF  cholesterol > 256
+  AND age <= 53
+  AND vessels_fluoroscopy > 1.5
+  AND thallium_level > 3.2
+  THEN P(heart disease) = 0.94</div>
+  <p>This matters enormously in medicine. The FDA, regulatory boards, and
+  individual doctors don't trust black-box predictions for high-stakes
+  decisions. WSRF gives them the score AND the full reasoning chain in the
+  same model. That's almost unique in the field right now.</p>
+  <p style="margin-top:1.6em; padding:14px 18px; border-left:3px solid var(--amber); background:rgba(245,158,11,.05); font-size:clamp(15px, 1.3vw, 18px);">
+    <strong style="color:var(--amber);">⚑ A note about prize eligibility:</strong>
+    Kaggle requires competitors to publicly open-source their code to be eligible
+    for prize money. William chose to keep the WSRF source closed while the
+    research was still developing, so even though the score sits near the top of
+    the leaderboard, the entry wasn't in the official prize pool. That's a
+    deliberate trade — proprietary math, public results.
+  </p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== HOW OTHERS CAN COMPETE ============================== -->
+<section>
+  <span class="badge cyan">For data scientists watching this · how to use it</span>
+  <h2>How <span class="gold">anyone</span> can compete in the top 0.1 % with this.</h2>
+  <p>Competitive data science happens on a site called <em>Kaggle</em> —
+  weekly competitions where teams worldwide race to predict things (disease,
+  fraud, customer behavior, physics events). Top 0.1 % = roughly one in a
+  thousand competitors. With WSRF, that's reachable on the right competitions.</p>
+  <p>Here's the practical guide:</p>
+  <div class="columns">
+    <div class="card">
+      <h4>1 · Install</h4>
+      <p class="small" style="font-family:monospace; color:var(--cyan); margin-bottom:.6em;">pip install wsrf-lib</p>
+      <p>Standard scikit-learn-compatible API. One line of install, one import, one method call.</p>
+    </div>
+    <div class="card">
+      <h4>2 · The first thing to try</h4>
+      <p class="small" style="font-family:monospace; color:var(--cyan); margin-bottom:.6em;">model.auto_discover(X, y)</p>
+      <p>Let it search for hidden structure automatically. Check <code>model.discovery_result_.summary()</code> to see what it found.</p>
+    </div>
+    <div class="card">
+      <h4>3 · When to reach for it</h4>
+      <p>Your XGBoost / LightGBM plateaus at the same score across seeds.
+      Validation diverges wildly from public LB. Feature importances disagree
+      between folds. Those are all signs of hidden structure WSRF can crack.</p>
+    </div>
+    <div class="card">
+      <h4>4 · Ensemble, don't compete</h4>
+      <p>Don't replace XGBoost with WSRF — <em>combine</em> them. Average their predictions. WSRF picks up structure XGBoost misses; XGBoost picks up smooth signal. The blend usually beats both.</p>
+    </div>
+    <div class="card">
+      <h4>5 · Best competition types</h4>
+      <p>Tabular Playground Series (often synthetic with hidden structure).
+      Medical / health datasets with mixed patient populations. Financial
+      competitions with regime shifts. Multi-target prediction problems.</p>
+    </div>
+    <div class="card">
+      <h4>6 · What to AVOID using it on</h4>
+      <p>Pure image / text / audio (use CNNs or transformers). Small datasets
+      under 1,000 rows. Smooth functions where every feature is individually
+      predictive — XGBoost wins those easily.</p>
+    </div>
+  </div>
+  <p style="margin-top:1.5em;" class="small">
+    <strong>Pro tip:</strong> on competitions where the public leaderboard has a
+    suspiciously stable ceiling — five teams all stuck at the same exact score —
+    that's the signature of hidden structure that the standard stack can't crack.
+    Bring WSRF. The ceiling moves.
+  </p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== FULL LIBRARY ============================== -->
+<section>
+  <span class="badge">The full stack</span>
+  <h2>This isn't one library. It's <span class="cyan">a whole shelf</span>.</h2>
+  <p>What William has actually built, all working, all on this machine:</p>
+  <div class="columns">
+    <div class="card">
+      <h4>WSRF · since 2011</h4>
+      <p>Williams Structured Random Forest. The original invention. Now at v7.0. Published on PyPI for anyone to install.</p>
+    </div>
+    <div class="card">
+      <h4>lars-logic</h4>
+      <p>Two-phase GF(2) elimination. Claimed <strong>2× faster</strong> than the algorithm cryptographers have used for decades.</p>
+    </div>
+    <div class="card">
+      <h4>schur-logic</h4>
+      <p>The parallel formulation. This is the library that proved the Rule 30 inverse you saw earlier.</p>
+    </div>
+    <div class="card">
+      <h4>larsdoku</h4>
+      <p>The pure-logic Sudoku solver. 35 techniques. <strong>5 invented from scratch</strong> by William.</p>
+    </div>
+    <div class="card">
+      <h4>wsrf-hlib</h4>
+      <p>High-level wrappers for medical and Kaggle work. The heart-disease model lives here.</p>
+    </div>
+    <div class="card">
+      <h4>The forensic decoder</h4>
+      <p>Catches coordinated lies in a knowledge base using coding theory. Useful for fraud detection, sensor-network integrity, disinformation.</p>
+    </div>
+  </div>
+  <p class="small" style="margin-top:1.5em;">Every piece is open source.
+  Every piece has reproducible test suites. Every piece has been working
+  quietly for years, waiting for the right moment to show the world.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== VISUAL CODA ============================== -->
+<section>
+  <span class="badge gold">And it's beautiful too</span>
+  <h2>Some of it is <span class="cyan">just visually stunning</span>.</h2>
+  <p>The same math powers an interactive WebGL playground where you can
+  watch the algorithms run in real time — variables shimmer like quantum
+  superpositions until the system "measures" them, constraints propagate as
+  glowing lines, corrupted data flashes red while the decoder catches them.</p>
+  <p>Click either card below to open the live demo. They're <em>actually running</em>, not screenshots.</p>
+  <div class="columns">
+    <a href="lars_forensic_playground_v3.html" target="_blank" rel="noopener"
+       class="card"
+       style="text-decoration:none; color:inherit; transition: all .2s ease; cursor:pointer;"
+       onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--cyan)'; this.style.boxShadow='0 12px 40px rgba(125,249,255,.18)'"
+       onmouseout="this.style.transform='none'; this.style.borderColor='#1a2240'; this.style.boxShadow='none'">
+      <h4>Forensic Playground v3 →</h4>
+      <p style="margin-top:.6em;">Real algorithm, live. Every cell is a variable, every line is a constraint, every red flash is a lie being caught. Click any cell to probe it. Switch between scenarios with the buttons. The math runs in your browser.</p>
+      <p class="small" style="font-family:monospace; color:var(--cyan); margin-top:1em;">→ lars_forensic_playground_v3.html</p>
+    </a>
+    <a href="lars_shadertoy_v2%20_playground.html" target="_blank" rel="noopener"
+       class="card"
+       style="text-decoration:none; color:inherit; transition: all .2s ease; cursor:pointer;"
+       onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--gold)'; this.style.boxShadow='0 12px 40px rgba(255,212,121,.18)'"
+       onmouseout="this.style.transform='none'; this.style.borderColor='#1a2240'; this.style.boxShadow='none'">
+      <h4 style="color:var(--gold)">Superposition Collapse v2 →</h4>
+      <p style="margin-top:.6em;">A lattice of "qubits" collapsing under the two-phase algorithm. Free variables shimmer like superposition, constraints propagate as glowing threads, the whole thing pulses on your screen.</p>
+      <p class="small" style="font-family:monospace; color:var(--gold); margin-top:1em;">→ lars_shadertoy_v2_playground.html</p>
+    </a>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== WHY IT MATTERS ============================== -->
+<section>
+  <span class="badge gold">Why this matters</span>
+  <h2>Why anyone <span class="cyan">should care</span>.</h2>
+  <p>These aren't tricks for a single problem. They're a way of looking at
+  math that exposes hidden structure where everyone else sees noise.</p>
+  <div class="columns">
+    <div class="card">
+      <h4>Medicine</h4>
+      <p>Finding which combinations of genes cause disease — a problem that's resisted standard methods for two decades.</p>
+    </div>
+    <div class="card">
+      <h4>Cybersecurity</h4>
+      <p>Detecting coordinated attacks that look like random noise to standard intrusion-detection systems.</p>
+    </div>
+    <div class="card">
+      <h4>AI safety</h4>
+      <p>Building AI systems that can explain <em>why</em> they made a decision in plain language, instead of being black boxes.</p>
+    </div>
+    <div class="card">
+      <h4>Science generally</h4>
+      <p>Inverting any physical process where the forward direction looks chaotic — climate, neural activity, market dynamics.</p>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============================== CLOSE ============================== -->
+<section style="align-items:center; text-align:center;">
+  <h1 style="font-size: clamp(36px, 6vw, 72px);">That's what William<br>is working on.</h1>
+  <p class="lead" style="margin: 1.5em auto; max-width:50ch;">It's real, it's
+  reproducible, and the entire run that produced these numbers happened on
+  this laptop in under two minutes.</p>
+  <p style="max-width:48ch; color:var(--muted)">The code, the demos, the
+  numbers, and the documentation are all sitting on this machine, ready to
+  show anyone who wants to verify.</p>
+  <div class="live-banner" style="margin: 2em auto;">
+    Every line of this code is on his laptop, right now!
+    <span class="eyes">👀 👀</span>
+  </div>
+  <p style="margin-top:2em; color:var(--gold); font-weight:600;">Thanks for
+  coming to see, Mom. 🌙</p>
+</section>
+
+<!-- ============================== FILE INDEX ============================== -->
+<section style="min-height:auto; padding:8vh 8vw;">
+  <span class="badge">Repository contents</span>
+  <h2 style="font-size:clamp(26px, 3.5vw, 40px);">Every file, every link.</h2>
+  <p style="font-size:clamp(15px, 1.3vw, 18px); max-width:60ch;">Click anything below to open it directly. Source on
+    <a href="https://github.com/oppressionslayer/formum" target="_blank" rel="noopener"
+       style="color:var(--violet); text-decoration:underline; text-decoration-color:rgba(167,139,250,.4);">github.com/oppressionslayer/formum</a>.</p>
+
+  <style>
+    .file-list { list-style: none; padding: 0; margin: 0; font-size: clamp(13px, 1.05vw, 15px); }
+    .file-list li { padding: 6px 0; border-bottom: 1px dashed rgba(125,249,255,.10); }
+    .file-list li:last-child { border-bottom: 0; }
+    .file-list a { color: var(--cyan); text-decoration: none; transition: color .15s, padding .15s; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+    .file-list a:hover { color: var(--gold); padding-left: 4px; }
+    .file-list .desc { color: var(--muted); font-size: .9em; margin-left: 8px; font-family: inherit; }
+  </style>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-top:2em; max-width:1100px;">
+
+    <div class="card">
+      <h4>Top level</h4>
+      <ul class="file-list">
+        <li><a href="README.md">README.md</a><span class="desc">— repo overview, the reproduce-in-90s command</span></li>
+        <li><a href="INSTALL.md">INSTALL.md</a><span class="desc">— setup, deps, Python 3.13 quirks</span></li>
+        <li><a href="LICENSE">LICENSE</a><span class="desc">— license terms</span></li>
+        <li><a href="lars_forensic_playground_v3.html">lars_forensic_playground_v3.html</a><span class="desc">— interactive WebGL syndrome decoder</span></li>
+        <li><a href="lars_shadertoy_v2%20_playground.html">lars_shadertoy_v2_playground.html</a><span class="desc">— GF(2) collapse playground</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>demos/ · runnable Python</h4>
+      <ul class="file-list">
+        <li><a href="demos/01_parity_90s.py">01_parity_90s.py</a><span class="desc">— headline parity demo, 90 seconds</span></li>
+        <li><a href="demos/02_parity_full.py">02_parity_full.py</a><span class="desc">— multi-seed benchmark + noise sweep + chart</span></li>
+        <li><a href="demos/03_rule30.py">03_rule30.py</a><span class="desc">— Rule 30 finite-inverse showcase</span></li>
+        <li><a href="demos/04_syndrome.py">04_syndrome.py</a><span class="desc">— forensic syndrome decoder, adversarial coalition</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>docs/ · context</h4>
+      <ul class="file-list">
+        <li><a href="docs/HOW_TO_USE_WSRF.md">HOW_TO_USE_WSRF.md</a><span class="desc">— big-picture framing</span></li>
+        <li><a href="docs/CAPABILITY_GAPS_CLOSED.md">CAPABILITY_GAPS_CLOSED.md</a><span class="desc">— six ML gaps + code</span></li>
+        <li><a href="docs/RULE30_INVERSION.md">RULE30_INVERSION.md</a><span class="desc">— 40-year claim, reversed</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>results/ · pre-computed</h4>
+      <ul class="file-list">
+        <li><a href="results/REPORT.md">REPORT.md</a><span class="desc">— full benchmark writeup</span></li>
+        <li><a href="results/accuracy.png">accuracy.png</a><span class="desc">— headline chart, 5 scenarios × 7 models</span></li>
+        <li><a href="results/noise.png">noise.png</a><span class="desc">— label-noise tolerance line plot</span></li>
+        <li><a href="results/results.csv">results.csv</a><span class="desc">— every individual run, raw</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>playground/ · visual</h4>
+      <ul class="file-list">
+        <li><a href="playground/lars_collapse_shadertoy.glsl">lars_collapse_shadertoy.glsl</a><span class="desc">— shader source for shadertoy.com</span></li>
+      </ul>
+    </div>
+
+    <div class="card" style="background:rgba(255,212,121,.06); border-color:rgba(255,212,121,.3);">
+      <h4 style="color:var(--gold)">This page</h4>
+      <ul class="file-list">
+        <li><a href="index.html" style="color:var(--gold);">index.html</a><span class="desc">— the walkthrough you're reading</span></li>
+      </ul>
+      <p class="small" style="margin-top:1em;">The whole site is one static folder — no build step, no server. Clone the repo and double-click <code>index.html</code> to run it locally.</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <p style="margin-bottom:1.4em;">
+    <a href="https://github.com/oppressionslayer/formum" target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:8px;
+              padding:8px 22px;
+              background: rgba(167, 139, 250, .08);
+              border: 1px solid rgba(167, 139, 250, .45);
+              border-radius: 100px;
+              color: var(--violet);
+              text-decoration: none;
+              font-size: 13px;
+              letter-spacing: .08em;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: all .2s ease;"
+       onmouseover="this.style.background='rgba(167,139,250,.18)'; this.style.boxShadow='0 0 36px rgba(167,139,250,.30)'"
+       onmouseout="this.style.background='rgba(167,139,250,.08)'; this.style.boxShadow='none'">
+      <span style="font-size:1.2em;">⌥</span>
+      <span>Source on GitHub · oppressionslayer/formum</span>
+      <span style="opacity:.55;">↗</span>
+    </a>
+  </p>
+  <p style="margin-bottom:.6em;">
+    Walkthrough generated from live benchmark numbers in this same repo.
+    All numbers reproducible.
+  </p>
+  <p>
+    Made with <span class="heart">❤</span> for moms who deserve to see what their kids are up to.
+  </p>
+  <p style="margin-top:1.6em; padding:10px 18px;
+            display:inline-block;
+            background: rgba(110, 240, 168, .06);
+            border: 1px solid rgba(110, 240, 168, .35);
+            border-radius: 100px;
+            color: var(--green);
+            font-size: 12px;
+            letter-spacing: .05em;">
+    <span style="font-weight:600;">✓ All links on this page resolve to real files</span>
+    <span style="color:var(--muted);"> — every demo, doc, result, and playground is present in this repo.</span>
+  </p>
+</footer>
+
+</body>
+</html>

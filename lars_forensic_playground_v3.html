@@ -1,0 +1,2086 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GF(2) Forensic Playground v3 — lars-logic + syndrome decoding</title>
+<style>
+  :root{
+    --bg:#04050a; --ink:#cfd6e6; --cyan:#7df9ff; --amber:#ffd479;
+    --violet:#a78bfa; --red:#ff6b8a; --green:#6ef0a8; --grey:#5a6378;
+    --teal:#5eead4;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    overflow:hidden;-webkit-font-smoothing:antialiased}
+  #stage{position:fixed;inset:0}
+  canvas{display:block;width:100%;height:100%;cursor:crosshair}
+
+  #hud{position:fixed;left:14px;top:12px;font-size:11px;line-height:1.55;
+    letter-spacing:.02em;pointer-events:none;
+    text-shadow:0 0 8px #000a, 0 0 2px #000c;max-width:360px}
+
+  #help{position:fixed;left:14px;top:280px;width:340px;font-size:10px;
+    line-height:1.55;letter-spacing:.01em;
+    background:rgba(8,10,16,.74);border:1px solid #1d2230;border-radius:10px;
+    padding:9px 12px 10px;backdrop-filter:blur(6px);
+    box-shadow:0 8px 30px #000a, inset 0 0 0 1px #ffffff08;
+    max-height:calc(100vh - 320px);overflow-y:auto;
+    user-select:none}
+  #help h4{margin:0 0 5px;font-size:10px;letter-spacing:.12em;
+    color:var(--cyan);text-transform:uppercase;font-weight:700}
+  #help h5{margin:8px 0 3px;font-size:9px;letter-spacing:.10em;
+    color:var(--grey);text-transform:uppercase;font-weight:600}
+  #help p{margin:3px 0;opacity:.88}
+  #help ol,#help ul{margin:3px 0;padding-left:18px}
+  #help li{margin:2px 0;opacity:.86}
+  #help kbd{background:#1a2030;border:1px solid #2a3245;border-radius:3px;
+    padding:0 4px;font-size:9px;color:var(--amber);font-family:inherit}
+  #help b{color:var(--cyan)}
+  #help .r{color:var(--red)} #help .g{color:var(--green)}
+  #help .m{color:var(--violet)} #help .k{color:var(--amber)}
+  #help .toggle{position:absolute;top:6px;right:10px;cursor:pointer;
+    opacity:.45;font-size:14px;line-height:1;user-select:none}
+  #help .toggle:hover{opacity:1}
+  #help.collapsed .body{display:none}
+  #help.collapsed{padding-bottom:6px}
+  #hud b{color:var(--cyan)}
+  #hud .k{color:var(--amber)}
+  #hud .m{color:var(--violet)}
+  #hud .r{color:var(--red)}
+  #hud .g{color:var(--green)}
+  #hud .grey{color:var(--grey)}
+  #hud .badge{display:inline-block;padding:0 6px;border-radius:4px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    margin-left:4px;font-size:10px;vertical-align:middle}
+  #hud .badge.ok{color:var(--green);border-color:var(--green)}
+  #hud .badge.fail{color:var(--red);border-color:var(--red)}
+  #hud .badge.warn{color:var(--amber);border-color:var(--amber)}
+  #hud hr{border:none;border-top:1px dashed #232a3a;margin:6px 0}
+
+  #panel{position:fixed;right:14px;top:12px;width:286px;
+    background:rgba(8,10,16,.82);border:1px solid #1d2230;border-radius:10px;
+    padding:10px 12px 12px;backdrop-filter: blur(8px);
+    box-shadow:0 8px 30px #000a, inset 0 0 0 1px #ffffff08;
+    font-size:11px;user-select:none;max-height:calc(100vh - 24px);
+    overflow-y:auto}
+  #panel h3{margin:0 0 8px;font-size:11px;letter-spacing:.12em;
+    color:var(--cyan);text-transform:uppercase;font-weight:700}
+  #panel h4{margin:10px 0 4px;font-size:10px;letter-spacing:.10em;
+    color:var(--grey);text-transform:uppercase;font-weight:600}
+  #panel .row{display:flex;align-items:center;justify-content:space-between;
+    gap:8px;margin:5px 0}
+  #panel label{opacity:.85}
+  #panel .group{display:flex;gap:4px;flex-wrap:wrap}
+  #panel button{
+    background:#10141d;color:var(--ink);border:1px solid #232a3a;
+    border-radius:6px;padding:4px 7px;font:inherit;font-size:10px;cursor:pointer;
+    transition:all .12s ease}
+  #panel button:hover{background:#161c28;border-color:#2f3a52}
+  #panel button.on{background:#1a2742;border-color:var(--cyan);color:var(--cyan);
+    box-shadow:0 0 0 1px #7df9ff33, 0 0 12px #7df9ff22}
+  #panel button.danger.on{background:#3a1421;border-color:var(--red);
+    color:var(--red);box-shadow:0 0 0 1px #ff6b8a33, 0 0 12px #ff6b8a22}
+  #panel button.scen.on{background:#1a3a28;border-color:var(--green);color:var(--green)}
+  #panel input[type=range]{width:120px;accent-color:var(--cyan)}
+  #panel .val{color:var(--amber);min-width:30px;text-align:right;font-size:10px}
+  #panel .hr{height:1px;background:#1d2230;margin:8px -12px}
+  #panel .hint{opacity:.55;font-size:10px;margin-top:6px;line-height:1.4}
+
+  #theorem{position:fixed;left:14px;bottom:12px;width:400px;
+    background:rgba(8,10,16,.94);border:1px solid #2a3041;border-radius:10px;
+    padding:12px 14px;font-size:11px;line-height:1.55;
+    box-shadow:0 8px 30px #000a;display:none}
+  #theorem h4{margin:0 0 6px;color:var(--cyan);font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase}
+  #theorem .close{position:absolute;top:6px;right:10px;cursor:pointer;
+    opacity:.5;font-size:18px;line-height:1}
+  #theorem .close:hover{opacity:1}
+  #theorem.shown{display:block}
+  #theorem .eq{text-align:center;font-size:13px;color:var(--cyan);
+    background:rgba(0,0,0,.4);padding:8px;border-radius:4px;margin:8px 0}
+  #theorem p{margin:6px 0}
+
+  #title{position:fixed;left:14px;bottom:8px;font-size:10px;opacity:.5}
+
+  #toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);
+    background:rgba(8,10,16,.94);border:1px solid var(--cyan);border-radius:6px;
+    padding:6px 14px;font-size:11px;color:var(--cyan);
+    opacity:0;transition:opacity .25s ease;pointer-events:none;
+    box-shadow:0 4px 12px #000a;z-index:100}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c"></canvas></div>
+
+<div id="hud">
+  <div><b>GF(2) FORENSIC PLAYGROUND · v3</b></div>
+  <div>phase <span class="k" id="phaseLbl">—</span> · t=<span id="t">0.00</span>s</div>
+  <hr>
+  <div>vars <span class="m" id="vars">—</span> · blocks <span class="m" id="blocks">—</span></div>
+  <div>constraints <span class="m" id="cons">—</span> <span class="grey">=</span>
+    <span class="m" id="cTA">—</span><span class="grey"> T_A · </span><span class="m" id="cTB">—</span><span class="grey"> T_B · </span><span class="m" id="cW">—</span><span class="grey"> W</span></div>
+  <div>forced <span class="g" id="forced">—</span> · free <span class="m" id="free">—</span></div>
+  <hr>
+  <div>trusted null-space k<sub>A</sub>=<span class="k" id="kA">—</span></div>
+  <div>min-distance d=<span class="k" id="dmin">—</span>
+    <span class="grey">(</span><span id="dminTag" class="grey">—</span><span class="grey">)</span></div>
+  <div>identifiability radius t*=<span class="k" id="tstar">—</span></div>
+  <hr>
+  <div>liars <span class="r" id="actLiars">—</span> · detected <span class="g" id="detLiars">—</span>
+    <span class="badge" id="detBadge">—</span></div>
+  <div>candidates <span class="m" id="candidates">—</span> · inspections <span class="k" id="inspections">0</span></div>
+  <div>bootstrap <span class="g" id="bootstrap">—/—</span>
+    <span class="badge" id="bootBadge">—</span></div>
+</div>
+
+<div id="help">
+  <span class="toggle" id="helpToggle" title="collapse / expand">▾</span>
+  <h4>What is this?</h4>
+  <div class="body">
+  <p>A live <b>GF(2) constraint system</b> over an N×N lattice of hidden bits.
+    <span style="color:var(--cyan)">Trusted laws</span> under-determine the state on purpose;
+    <span class="m">witnesses</span> fill in the rest — but some <span class="r">lie</span>.
+    The system runs real <b>syndrome decoding</b> (loopy belief propagation + min-weight enumeration)
+    to identify the liars, then bootstrap-verifies the recovered state against held-out trusted laws.</p>
+  <p style="font-size:9.5px;opacity:.7">Every number in the HUD comes from actual GF(2) elimination
+    running in your browser — no mock data.</p>
+
+  <h5>Quick start</h5>
+  <ol>
+    <li>Click a <b>Scenarios</b> button — <span class="g">Easy</span> places t*−1 lies
+      (under the identifiability bound), <span class="k">Tight</span> places exactly t* (uniquely decodable),
+      <b>Ambiguous</b> places t*+1 (multiple candidates), <span class="r">Overwhelmed</span> places t*+2 (graceful failure).</li>
+    <li>Watch the HUD's <b>detected k/m</b> badge. ✓ means the decoder caught every actual liar.</li>
+    <li>Drag the <b>Phase scrubber</b> to animate the two-phase collapse: shimmer (superposition)
+      → intra-block forced → cross-block forced → final.</li>
+    <li>For ambiguous scenarios, turn on <b>Active interrogation</b>: amber rings mark cells
+      whose true value will maximally distinguish the candidate liar sets. Click one to inspect.</li>
+    <li><kbd>space</kbd> re-seeds the world. Click any cell to probe (measure or flip).</li>
+  </ol>
+
+  <h5>What the colors mean</h5>
+  <ul>
+    <li><span style="color:var(--cyan)">cyan edges</span> = trusted laws (T_A) used for detection</li>
+    <li><span style="color:#7080a0">faded edges</span> = trusted laws held out for bootstrap (T_B)</li>
+    <li><span class="m">violet edges</span> = witnesses (the suspect pool)</li>
+    <li><span class="r">pulsing red edges</span> = corrupted by the liar coalition</li>
+    <li><b>iridescent shimmer cell</b> = still in superposition (free variable)</li>
+    <li><b>0 / 1 glyph cell</b> = collapsed (forced by algebra)</li>
+    <li><span style="color:#9bccff">cyan ring around cell</span> = detector flagged a variable in a found liar</li>
+    <li><span class="k">amber ring</span> = active-interrogation suggestion</li>
+  </ul>
+
+  <h5>Why it's useful</h5>
+  <p>A sandbox for the <b>forensic syndrome-decoder</b> pipeline from <em>lars-logic</em>.
+    Useful for: teaching how identifiability bounds work (d, t*); demonstrating that
+    naive residual heuristics fail on adversarial coalitions; testing scenarios where
+    a knowledge base's witnesses are partially corrupted; understanding the
+    relationship between code minimum distance and how many lies you can catch.</p>
+
+  <h5>Keys</h5>
+  <p><kbd>space</kbd> reseed · <kbd>0</kbd>/<kbd>1</kbd>/<kbd>2</kbd>/<kbd>4</kbd> phase ·
+     <kbd>L</kbd> liars · <kbd>E</kbd> edges · <kbd>H</kbd> halo ·
+     <kbd>D</kbd> decode · <kbd>T</kbd> theorem</p>
+  </div>
+</div>
+
+<aside id="panel">
+  <h3>Controls</h3>
+
+  <h4>Phase scrubber</h4>
+  <div class="row">
+    <input type="range" id="phaseSlider" min="0" max="1" step="0.001" value="1" style="width:100%">
+  </div>
+  <div class="row">
+    <div class="group" id="phaseBtns" style="flex:1">
+      <button data-phase="0">0 · init</button>
+      <button data-phase="1">1 · intra</button>
+      <button data-phase="2">2 · cross</button>
+      <button data-phase="4" class="on">4 · syndrome</button>
+    </div>
+  </div>
+
+  <h4>Scenarios</h4>
+  <div class="row">
+    <div class="group" id="scenarioBtns">
+      <button data-scenario="easy" class="scen">Easy</button>
+      <button data-scenario="tight" class="scen">Tight</button>
+      <button data-scenario="ambig" class="scen">Ambiguous</button>
+      <button data-scenario="over" class="scen">Overwhelmed</button>
+    </div>
+  </div>
+
+  <h4>Toggles</h4>
+  <div class="row"><label>Liar coalition</label>
+    <button id="liarsBtn" class="danger on">ON</button>
+  </div>
+  <div class="row"><label>Show edges</label>
+    <button id="edgesBtn" class="on">ON</button>
+  </div>
+  <div class="row"><label>BP pulses</label>
+    <button id="bpBtn" class="on">ON</button>
+  </div>
+  <div class="row"><label>Min-dist halo</label>
+    <button id="haloBtn">OFF</button>
+  </div>
+  <div class="row"><label>Active interrogation</label>
+    <button id="interrogBtn">OFF</button>
+  </div>
+
+  <h4>Probe mode</h4>
+  <div class="row">
+    <div class="group" id="probeBtns">
+      <button data-probe="measure" class="on">measure</button>
+      <button data-probe="flip">flip</button>
+    </div>
+  </div>
+
+  <h4>World</h4>
+  <div class="row"><label>Density</label>
+    <input type="range" id="density" min="0.15" max="0.55" step="0.01" value="0.32">
+    <span class="val" id="densityVal">.32</span>
+  </div>
+  <div class="row"><label>Liar count</label>
+    <input type="range" id="nLiars" min="0" max="12" step="1" value="3">
+    <span class="val" id="nLiarsVal">3</span>
+  </div>
+  <div class="row"><label>Grid</label>
+    <div class="group" id="gridBtns">
+      <button data-grid="16">16</button>
+      <button data-grid="20" class="on">20</button>
+      <button data-grid="24">24</button>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="row">
+    <button id="reseedBtn" style="flex:1">⟳ re-seed (space)</button>
+  </div>
+  <div class="row">
+    <button id="decodeBtn" style="flex:1">⚡ syndrome-decode</button>
+  </div>
+  <div class="row">
+    <button id="theoremBtn" style="flex:1">📐 theorem</button>
+  </div>
+
+  <div class="hint">
+    <b>Tight</b>: t* lies, uniquely decodable.
+    <b>Ambiguous</b>: t*+1 lies, multiple candidates.
+    <b>Overwhelmed</b>: t*+2 lies, system reports honest failure.
+    Click a cell to probe; with <b>active interrogation</b> ON, the system suggests which cells will disambiguate.
+  </div>
+</aside>
+
+<div id="theorem">
+  <span class="close" id="theoremClose">×</span>
+  <h4>Identifiability theorem</h4>
+  <p>For the projected syndrome code with minimum distance <b>d</b>:</p>
+  <div class="eq">t* = ⌊(d − 1) / 2⌋</div>
+  <p>Up to <b>t*</b> adversarial witnesses can be uniquely identified from
+  the observable parity syndromes. At weight t*+1, the syndrome admits
+  multiple minimum-weight explanations — the system can return at best
+  the equivalence class. Beyond that, identifiability is lost.</p>
+  <p style="font-size:10px;color:var(--grey)">
+    d = <span id="thmD">—</span> ·
+    t* = <span id="thmT">—</span> ·
+    actual lies = <span id="thmActual">—</span> ·
+    detected = <span id="thmDetected">—</span>
+  </p>
+</div>
+
+<div id="title"><span style="color:var(--cyan)">lars-logic</span> · real GF(2) elimination · two-phase block solve · syndrome decoding · bootstrap verify</div>
+<div id="toast"></div>
+
+<!-- ====================================================================== -->
+<!-- Shaders                                                                -->
+<!-- ====================================================================== -->
+<script id="vert" type="x-shader/x-vertex">
+attribute vec2 p;
+void main(){ gl_Position = vec4(p, 0.0, 1.0); }
+</script>
+
+<script id="frag-lattice" type="x-shader/x-fragment">
+precision highp float;
+
+uniform vec2  iResolution;
+uniform float iTime;
+uniform vec2  iMouse;
+uniform float iMouseT;
+uniform float iPhase;
+uniform float iScrub;
+uniform float iLiars;
+uniform float iHalo;
+uniform float iAnim;
+uniform float iBP;
+uniform float iGrid;
+uniform sampler2D iLattice;
+uniform float iN;
+uniform float iDmin;
+uniform float iLatticeSidePx;
+uniform vec2  iLatticeOriginPx;
+
+float h1(float n){ return fract(sin(n)*43758.5453123); }
+float h2(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+
+float vnoise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f*f*(3.0-2.0*f);
+  float a = h2(i), b = h2(i+vec2(1,0)),
+        c = h2(i+vec2(0,1)), d = h2(i+vec2(1,1));
+  return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+}
+float fbm(vec2 p){
+  float s = 0.0, a = 0.5;
+  for(int i=0;i<4;i++){ s += a*vnoise(p); p = p*2.07 + 17.0; a *= 0.55; }
+  return s;
+}
+vec3 hsv(float h, float s, float v){
+  vec3 k = vec3(1.0, 2.0/3.0, 1.0/3.0);
+  vec3 p = abs(fract(vec3(h)+k)*6.0 - 3.0);
+  return v * mix(vec3(1.0), clamp(p-1.0, 0.0, 1.0), s);
+}
+
+float glyph(vec2 lp, float bit){
+  float r = length(lp);
+  if(bit < 0.5){
+    return smoothstep(0.55,0.50,r) - smoothstep(0.42,0.37,r);
+  }
+  float bar = smoothstep(0.10,0.06,abs(lp.x)) * smoothstep(0.55,0.50,abs(lp.y));
+  return bar;
+}
+
+void main(){
+  vec2 frag = gl_FragCoord.xy;
+  vec2 res  = iResolution;
+  vec2 uv   = (frag - 0.5*res) / min(res.x, res.y);
+
+  float side = iLatticeSidePx;
+  float cellPx = side / iGrid;
+  vec2 origin = iLatticeOriginPx;
+  vec2 latPx  = frag - origin;
+  vec2 cell   = floor(latPx / cellPx);
+  vec2 inCell = (latPx - cell*cellPx) / cellPx;
+  vec2 local  = inCell*2.0 - 1.0;
+
+  vec2 tc = (cell + 0.5) / iN;
+  bool inRange = latPx.x >= 0.0 && latPx.y >= 0.0
+              && latPx.x < side && latPx.y < side;
+
+  vec4 data = inRange ? texture2D(iLattice, tc) : vec4(0.0);
+  // R = forced flag, G = state value, B byte:
+  //   bit0 = ground-truth liar, bit1 = detected liar, bit2 = held-out trusted
+  //   bit3 = on-syndrome-edge, bit4 = candidate-distinguisher
+  // A = blockHue
+  float forcedFlag  = data.r;
+  float state       = data.g;
+  float bMask       = data.b * 255.0;
+  float blockHue    = data.a;
+
+  // Decode mask flags
+  float gtLiar    = mod(bMask, 2.0); bMask = floor(bMask*0.5);
+  float detLiar   = mod(bMask, 2.0); bMask = floor(bMask*0.5);
+  float heldOut   = mod(bMask, 2.0); bMask = floor(bMask*0.5);
+  float onSyn     = mod(bMask, 2.0); bMask = floor(bMask*0.5);
+  float distinguish = mod(bMask, 2.0);
+
+  // Live liar visibility (only if liars toggle on AND ground truth)
+  float visibleGtLiar = gtLiar * iLiars;
+
+  // Scrub: cells collapse progressively. iScrub ∈ [0,1]. A cell becomes
+  // forced when its order (mapped 0..1 via vnoise+block id) <= iScrub.
+  // We approximate order via state.g hash plus block hue.
+  float order = h2(cell*0.13 + vec2(blockHue*7.0));
+  float collapseGate = step(order, iScrub);
+  float forced = forcedFlag * collapseGate;
+
+  // Base color by block hue
+  vec3 col = vec3(0.018, 0.022, 0.034);
+  if(inRange){
+    col = hsv(blockHue*0.85 + 0.55, 0.55, 0.18);
+    if(heldOut > 0.5){
+      col = mix(col, vec3(0.07, 0.05, 0.10), 0.55); // dimmer for held-out region
+    }
+  }
+
+  if(inRange){
+    // block boundary glow — compare neighbor hues
+    vec2 px = vec2(1.0/iN, 0.0);
+    float hL = texture2D(iLattice, tc - px).a;
+    float hR = texture2D(iLattice, tc + px).a;
+    float hD = texture2D(iLattice, tc - px.yx).a;
+    float hU = texture2D(iLattice, tc + px.yx).a;
+    float dL = step(1.5/255.0, abs(hL - blockHue));
+    float dR = step(1.5/255.0, abs(hR - blockHue));
+    float dD = step(1.5/255.0, abs(hD - blockHue));
+    float dU = step(1.5/255.0, abs(hU - blockHue));
+    float seam =
+        dL * smoothstep(0.10, 0.0, inCell.x) +
+        dR * smoothstep(0.10, 0.0, 1.0-inCell.x) +
+        dD * smoothstep(0.10, 0.0, inCell.y) +
+        dU * smoothstep(0.10, 0.0, 1.0-inCell.y);
+    col += hsv(blockHue*0.85+0.55, 0.45, 1.0) * seam * 0.4;
+
+    // soft cell-edge darken
+    float minEdge = min(min(inCell.x,1.0-inCell.x), min(inCell.y,1.0-inCell.y));
+    col *= 0.7 + 0.3*smoothstep(0.0, 0.08, minEdge);
+  }
+
+  // Superposition shimmer for free vars (phase >= 1)
+  if(forced < 0.5 && inRange && iPhase >= 0.5){
+    float shim = fbm(cell*0.7 + iTime*0.6);
+    vec3 iris = hsv(shim + iTime*0.05, 0.85, 0.85);
+    float br = 0.55 + 0.45*sin(iTime*3.0 + h1(cell.x*0.7+cell.y)*6.28);
+    col = mix(col, iris, 0.65*br);
+    float r = length(local);
+    col += iris * 0.25 * smoothstep(1.0, 0.2, r);
+  } else if(inRange && forced > 0.5) {
+    float g = glyph(local, state);
+    vec3 fg = state > 0.5 ? vec3(0.80,0.96,1.0) : vec3(1.0,0.86,0.55);
+    col = mix(col, fg, g*0.95);
+    col += (state>0.5 ? vec3(0.02,0.05,0.07) : vec3(0.06,0.04,0.0));
+  } else if(inRange){
+    // phase 0: dark grid only
+    float g = 0.0;
+  }
+
+  // Ground-truth liar (always pulsing red when visible)
+  if(visibleGtLiar > 0.5 && inRange){
+    float pulse = 0.5 + 0.5*sin(iTime*5.5 + cell.x*1.7 + cell.y*0.9);
+    vec3 red = vec3(1.0, 0.25, 0.4);
+    col = mix(col, red, 0.55 + 0.4*pulse);
+    float r = length(local);
+    col += red * 0.35 * smoothstep(1.0, 0.0, abs(r - 0.5 - 0.3*sin(iTime*3.0)));
+  }
+
+  // Detected liar — bright cyan-edged ring
+  if(detLiar > 0.5 && inRange){
+    float r = length(local);
+    float ring = smoothstep(0.05, 0.0, abs(r - 0.78));
+    col += vec3(0.5, 0.95, 1.0) * ring * 1.2;
+  }
+
+  // On-syndrome highlight (variables participating in unsatisfied checks)
+  if(onSyn > 0.5 && inRange && iBP > 0.5){
+    float r = length(local);
+    float band = smoothstep(0.40, 0.30, r) - smoothstep(0.32, 0.22, r);
+    col += vec3(1.0, 0.7, 0.85) * band * 0.5;
+  }
+
+  // Candidate-distinguishing bit (active interrogation hint)
+  if(distinguish > 0.5 && inRange){
+    float ring = smoothstep(0.06, 0.0, abs(length(local) - 0.62));
+    vec3 amber = vec3(1.0, 0.84, 0.4);
+    col += amber * ring * (0.6 + 0.4*sin(iTime*4.0));
+  }
+
+  // Min-dist halo: rings expanding from detected/known liars
+  if(iHalo > 0.5 && (visibleGtLiar > 0.5 || detLiar > 0.5)){
+    float radius = (iDmin * 0.5) * cellPx / min(res.x, res.y);
+    vec2 cellCenterPx = origin + (cell + 0.5)*cellPx;
+    vec2 cellCenterUV = (cellCenterPx - 0.5*res) / min(res.x, res.y);
+    float dToCenter = length(uv - cellCenterUV);
+    float ph = fract(iTime*0.4);
+    float ringR = radius * ph;
+    float halo = smoothstep(0.012, 0.0, abs(dToCenter - ringR)) * (1.0 - ph);
+    col += vec3(1.0, 0.7, 0.85) * halo * 0.55;
+  }
+
+  // Click measurement ring
+  if(iMouse.x > 0.0 || iMouse.y > 0.0){
+    float dt = max(0.0, iTime - iMouseT);
+    float r = length(frag - iMouse);
+    float ringR = dt * 480.0;
+    float ring = smoothstep(20.0, 0.0, abs(r - ringR)) * exp(-dt*0.8);
+    col += vec3(0.6, 0.95, 1.0) * ring * 0.85;
+    float inside = (1.0 - smoothstep(ringR-32.0, ringR, r)) * exp(-dt*1.1);
+    col += vec3(0.9,0.95,1.0) * inside * 0.10;
+  }
+
+  float vig = smoothstep(1.5, 0.4, length(uv));
+  col *= 0.35 + 0.65*vig;
+  col = col / (1.0 + col);                       // tone-map
+  col = pow(col, vec3(1.0/2.0));                 // gamma-ish
+  col *= 0.97 + 0.03*sin(frag.y*3.1416);         // mild scanline
+
+  gl_FragColor = vec4(col, 1.0);
+}
+</script>
+
+<script id="vert-edge" type="x-shader/x-vertex">
+attribute vec2 a_pos;
+attribute vec2 a_uv;
+attribute vec4 a_color;
+attribute float a_phase;
+attribute float a_kind;
+varying vec2 v_uv;
+varying vec4 v_color;
+varying float v_phase;
+varying float v_kind;
+void main(){
+  v_uv = a_uv;
+  v_color = a_color;
+  v_phase = a_phase;
+  v_kind = a_kind;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}
+</script>
+
+<script id="frag-edge" type="x-shader/x-fragment">
+precision highp float;
+varying vec2 v_uv;
+varying vec4 v_color;
+varying float v_phase;
+varying float v_kind;
+uniform float iTime;
+uniform float iBP;
+uniform float iAnim;
+void main(){
+  float u = v_uv.x;
+  float v = v_uv.y;
+  float dCenter = abs(v);
+  float core = smoothstep(0.55, 0.0, dCenter);
+  float halo = smoothstep(1.0, 0.0, dCenter);
+  vec3 col = v_color.rgb;
+  float intensity = v_color.a;
+
+  // Traveling pulse along the edge
+  float pulseSpeed = 0.55 + 0.25 * v_kind;
+  float pulseU = fract(iTime * pulseSpeed * iAnim + v_phase);
+  float pulse = exp(-32.0 * (u - pulseU) * (u - pulseU));
+
+  if (v_kind > 2.5 && v_kind < 3.5){
+    // Corrupted edges: pulsing red
+    float redPulse = 0.5 + 0.5 * sin(iTime * 7.0 + v_phase * 6.28);
+    intensity *= 1.0 + 0.6 * redPulse;
+    intensity *= 0.5 + 0.5 * pulse;
+  } else if (v_kind > 3.5){
+    // BP edges: only when BP on
+    if (iBP < 0.5) discard;
+    intensity *= 0.35 + 0.65 * pulse;
+  } else {
+    // Normal edges: subtle pulse
+    intensity *= 0.75 + 0.25 * pulse;
+  }
+
+  vec3 final = col * (core * intensity + halo * 0.18 * intensity);
+  float alpha = (core * 0.9 + halo * 0.25) * intensity;
+  gl_FragColor = vec4(final, alpha);
+}
+</script>
+
+<!-- ====================================================================== -->
+<!-- App                                                                    -->
+<!-- ====================================================================== -->
+<script>
+(() => {
+'use strict';
+
+// =============================================================================
+//  GF(2) solver — bitset rows, RREF, kind-aware (trusted-A / trusted-B / witness)
+// =============================================================================
+class GF2 {
+  constructor(nVars){
+    this.n = nVars;
+    this.W = Math.ceil(nVars / 32);
+    this.rows = [];               // each: { bits, rhs, kind, intraBlock, blockId }
+  }
+  static row(W){ return { bits: new Uint32Array(W), rhs: 0, kind: 0, intraBlock: true, blockId: -1 }; }
+  static setBit(r, j){ r.bits[j>>>5] ^= (1<<(j&31)); }
+  static getBit(r, j){ return (r.bits[j>>>5] >>> (j&31)) & 1; }
+  static xorRow(a, b){
+    for(let i=0;i<a.bits.length;i++) a.bits[i] ^= b.bits[i];
+    a.rhs ^= b.rhs;
+  }
+  static popcount(r){
+    let c = 0;
+    for(let i=0;i<r.bits.length;i++){
+      let v = r.bits[i];
+      while(v){ v &= (v-1); c++; }
+    }
+    return c;
+  }
+  static cloneRow(r){
+    return { bits: r.bits.slice(), rhs: r.rhs, kind: r.kind,
+             intraBlock: r.intraBlock, blockId: r.blockId };
+  }
+  add(varIdxs, rhs, kind=0, blockId=-1, intraBlock=true){
+    const r = GF2.row(this.W);
+    r.rhs = rhs & 1;
+    r.kind = kind;
+    r.blockId = blockId;
+    r.intraBlock = intraBlock;
+    for(const j of varIdxs) GF2.setBit(r, j);
+    this.rows.push(r);
+  }
+
+  // RREF with selectable row subset (predicate); returns reduced rows + pivots
+  rrefSubset(predicate){
+    const rows = this.rows.filter(predicate).map(GF2.cloneRow);
+    const n = this.n, W = this.W;
+    const pivots = new Map();
+    let rIdx = 0;
+    for(let col=0; col<n && rIdx<rows.length; col++){
+      let pivot = -1;
+      for(let r=rIdx; r<rows.length; r++){
+        if(GF2.getBit(rows[r], col)){ pivot = r; break; }
+      }
+      if(pivot < 0) continue;
+      if(pivot !== rIdx){ const t=rows[rIdx]; rows[rIdx]=rows[pivot]; rows[pivot]=t; }
+      const pr = rows[rIdx];
+      for(let r=0; r<rows.length; r++){
+        if(r===rIdx) continue;
+        if(GF2.getBit(rows[r], col)) GF2.xorRow(rows[r], pr);
+      }
+      pivots.set(col, rIdx);
+      rIdx++;
+    }
+    let inconsistent = false, badRowIdxs = [];
+    for(let i=0;i<rows.length;i++){
+      const r = rows[i];
+      let zero = true;
+      for(let k=0;k<W;k++) if(r.bits[k]){ zero=false; break; }
+      if(zero && r.rhs){ inconsistent = true; badRowIdxs.push(i); }
+    }
+    return { rows, pivots, inconsistent, badRowIdxs };
+  }
+
+  rref(){ return this.rrefSubset(_ => true); }
+
+  // Solve using a given subset; returns per-var forced/value, contradictions
+  solveSubset(predicate){
+    const { rows, pivots, inconsistent } = this.rrefSubset(predicate);
+    const n = this.n;
+    const out = new Array(n);
+    for(let j=0;j<n;j++) out[j] = { forced:false, value:0 };
+    if(!inconsistent){
+      for(const [col, ri] of pivots.entries()){
+        const r = rows[ri];
+        let setCount = 0, lastBit = -1;
+        outer:
+        for(let i=0;i<this.W;i++){
+          let w = r.bits[i];
+          while(w){
+            const b = w & -w;
+            const k = i*32 + (32 - Math.clz32(b) - 1);
+            lastBit = k;
+            setCount++;
+            w ^= b;
+            if(setCount>1) break outer;
+          }
+        }
+        if(setCount === 1 && lastBit === col){
+          out[col] = { forced:true, value: r.rhs };
+        }
+      }
+    }
+    return { out, inconsistent };
+  }
+
+  // Block partition (union-find on shared constraints, trusted-only)
+  blockPartition(predicate){
+    const n = this.n;
+    const parent = new Array(n); for(let i=0;i<n;i++) parent[i]=i;
+    const find = x => { while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; };
+    const uni  = (a,b) => { a=find(a); b=find(b); if(a!==b) parent[a]=b; };
+    for(const r of this.rows){
+      if(!predicate(r)) continue;
+      let first = -1;
+      for(let j=0;j<n;j++){
+        if(GF2.getBit(r, j)){
+          if(first<0) first = j;
+          else uni(first, j);
+        }
+      }
+    }
+    const blockId = new Array(n);
+    const roots = new Map();
+    let nextId = 0;
+    for(let i=0;i<n;i++){
+      const root = find(i);
+      if(!roots.has(root)) roots.set(root, nextId++);
+      blockId[i] = roots.get(root);
+    }
+    return { blockId, nBlocks: nextId };
+  }
+
+  // Get variable indices for a row as an array
+  varsOf(r){
+    const v = [];
+    for(let j=0;j<this.n;j++) if(GF2.getBit(r, j)) v.push(j);
+    return v;
+  }
+}
+
+// =============================================================================
+//  World builder — partitions the N×N lattice into B×B blocks. Generates
+//  trusted-detection (T_A, intra-block), trusted-held-out (T_B, cross-block),
+//  and witness (W) constraints. A "ground truth" assignment is sampled and
+//  all constraint RHS values are set to satisfy it (then a liar coalition
+//  flips a subset of WITNESS RHS only).
+// =============================================================================
+function buildWorld(N, density, rng){
+  const nVars = N*N;
+  const cs = new GF2(nVars);
+  const truth = new Uint8Array(nVars);
+  for(let i=0;i<nVars;i++) truth[i] = rng() < 0.5 ? 0 : 1;
+
+  const B = 4;
+  const blocksX = Math.ceil(N/B);
+  const blocksY = Math.ceil(N/B);
+  let blockSeq = 0;
+  const cellBlock = new Int32Array(nVars);
+  const blockCells = [];
+  for(let by=0; by<blocksY; by++){
+    for(let bx=0; bx<blocksX; bx++){
+      const id = blockSeq++;
+      const cells = [];
+      for(let y=by*B; y<Math.min((by+1)*B, N); y++)
+        for(let x=bx*B; x<Math.min((bx+1)*B, N); x++){
+          cells.push(y*N + x);
+          cellBlock[y*N + x] = id;
+        }
+      blockCells.push(cells);
+    }
+  }
+  const nBlocks = blockSeq;
+
+  // T_A intra-block: DELIBERATELY rank-deficient per block, so the trusted-only
+  // subsystem leaves real free dimensions. Per 16-cell block we aim for rank
+  // ~floor(cells.length * (0.55 + density*0.5)) so deficit > 0.
+  for(let bi=0; bi<nBlocks; bi++){
+    const cells = blockCells[bi];
+    const k = Math.max(2, Math.floor(cells.length * (0.55 + density*0.5)));
+    for(let i=0;i<k;i++){
+      const sz = 2 + Math.floor(rng()*Math.min(3, cells.length-1));
+      const pick = [];
+      const pool = cells.slice();
+      for(let s=0;s<sz;s++){
+        const idx = Math.floor(rng()*pool.length);
+        pick.push(pool[idx]); pool.splice(idx,1);
+      }
+      let rhs = 0;
+      for(const j of pick) rhs ^= truth[j];
+      cs.add(pick, rhs, 0, bi, true);
+    }
+  }
+
+  // T_A cross-block: a few global trusted bridges (kind=0 but intraBlock=false).
+  // These are what Phase 2 elimination uses.
+  const taCrossK = Math.max(3, Math.round(nBlocks * 0.6));
+  for(let i=0;i<taCrossK;i++){
+    const sz = 2 + Math.floor(rng()*2);
+    const pick = [];
+    const used = new Set();
+    const blocksUsed = new Set();
+    let tries = 0;
+    while(pick.length < sz && tries++ < 50){
+      const j = Math.floor(rng()*nVars);
+      if(used.has(j)) continue;
+      used.add(j); pick.push(j); blocksUsed.add(cellBlock[j]);
+    }
+    if(blocksUsed.size < 2) continue;       // must actually bridge
+    let rhs = 0;
+    for(const j of pick) rhs ^= truth[j];
+    cs.add(pick, rhs, 0, -1, false);
+  }
+
+  // T_B: held-out trusted — cross-block, for bootstrap verification.
+  // ~12-20 equations gives 2^-12..2^-20 random-code FP probability.
+  const tbCount = Math.max(10, Math.round(nBlocks * 0.8));
+  for(let i=0;i<tbCount;i++){
+    const sz = 2 + Math.floor(rng()*2);
+    const pick = [];
+    const used = new Set();
+    while(pick.length < sz){
+      const j = Math.floor(rng()*nVars);
+      if(!used.has(j)){ used.add(j); pick.push(j); }
+    }
+    let rhs = 0;
+    for(const j of pick) rhs ^= truth[j];
+    cs.add(pick, rhs, 1, -1, false);
+  }
+
+  // Witnesses: bulk constraints that, together with T_A, are intended to
+  // pin x uniquely (modulo the liars).
+  const wCount = Math.max(40, Math.round(nVars * 0.45));
+  for(let i=0;i<wCount;i++){
+    const sz = 3 + Math.floor(rng()*3);     // 3..5
+    const pick = [];
+    const used = new Set();
+    while(pick.length < sz){
+      const j = Math.floor(rng()*nVars);
+      if(!used.has(j)){ used.add(j); pick.push(j); }
+    }
+    let rhs = 0;
+    for(const j of pick) rhs ^= truth[j];
+    const b0 = cellBlock[pick[0]];
+    let intra = true;
+    for(const j of pick) if(cellBlock[j] !== b0){ intra = false; break; }
+    cs.add(pick, rhs, 2, intra ? b0 : -1, intra);
+  }
+
+  return { cs, truth, cellBlock, nBlocks };
+}
+
+// =============================================================================
+//  Inject lies: flip RHS on `k` random witness rows. Returns the set of
+//  corrupted witness row indices (the ground truth).
+// =============================================================================
+function injectLies(cs, k, rng){
+  const witnessIdxs = [];
+  for(let i=0;i<cs.rows.length;i++) if(cs.rows[i].kind === 2) witnessIdxs.push(i);
+  shuffle(witnessIdxs, rng);
+  const corrupted = new Set();
+  for(let i=0;i<Math.min(k, witnessIdxs.length);i++){
+    const rIdx = witnessIdxs[i];
+    cs.rows[rIdx].rhs ^= 1;
+    corrupted.add(rIdx);
+  }
+  return corrupted;
+}
+function shuffle(arr, rng){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(rng()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// =============================================================================
+//  Syndrome projection + min-weight decoding
+//
+//  Step 1: compute trusted-A particular solution x0 and null-space basis N.
+//  Step 2: project each witness equation through N: M = W @ N (m_W rows × k cols).
+//          witness mismatch  c[i] = b_W[i]  XOR  (W[i] @ x0).
+//  Step 3: compute left null space L of M (rows L_a with L_a @ M = 0).
+//          syndrome s = L @ c. Min-weight e satisfying L@e = s identifies liars.
+//
+//  We don't materialize all of L for large systems. Instead we run BP directly
+//  on the projected check matrix and use a sibling-scan to find low-weight
+//  alternative solutions.
+// =============================================================================
+function projectSyndrome(cs){
+  // Particular solution of T_A rows
+  const TA = cs.rows.filter(r => r.kind === 0);
+  // Use RREF on T_A to find a particular x0 (free vars set to 0).
+  const { rows, pivots, inconsistent } = cs.rrefSubset(r => r.kind === 0);
+  const x0 = new Uint8Array(cs.n);
+  if(!inconsistent){
+    for(const [col, ri] of pivots.entries()){
+      // value of pivot col = rhs (free vars are 0)
+      x0[col] = rows[ri].rhs;
+    }
+  }
+  // Null space basis of T_A (each free var -> a basis vector)
+  const pivotSet = new Set(pivots.keys());
+  const freeCols = [];
+  for(let c=0;c<cs.n;c++) if(!pivotSet.has(c)) freeCols.push(c);
+  // For each free var f, basis vector v_f has v_f[f]=1 and v_f[pivot] = row[ri][f]
+  const basis = freeCols.map(f => {
+    const v = new Uint8Array(cs.n);
+    v[f] = 1;
+    for(const [col, ri] of pivots.entries()){
+      if(GF2.getBit(rows[ri], f)) v[col] = 1;
+    }
+    return v;
+  });
+  // c[i] = b_W[i] ^ W[i] @ x0
+  const W = cs.rows.filter(r => r.kind === 2);
+  const c = new Uint8Array(W.length);
+  for(let i=0;i<W.length;i++){
+    let xor = 0;
+    for(let j=0;j<cs.n;j++){
+      if(GF2.getBit(W[i], j)) xor ^= x0[j];
+    }
+    c[i] = W[i].rhs ^ xor;
+  }
+  // M[i][f] = W[i] @ basis[f]
+  const M = new Uint8Array(W.length * basis.length);
+  for(let i=0;i<W.length;i++){
+    for(let f=0;f<basis.length;f++){
+      let v = 0;
+      const bv = basis[f];
+      for(let j=0;j<cs.n;j++){
+        if(GF2.getBit(W[i], j) && bv[j]) v ^= 1;
+      }
+      M[i*basis.length + f] = v;
+    }
+  }
+  return { x0, basis, freeCols, W, c, M, mRows: W.length, kCols: basis.length };
+}
+
+// Compute left null space of M (rows e ∈ {0,1}^mRows such that e^T @ M = 0).
+// Returns a parity-check matrix L of shape (numChecks, mRows).
+function leftNullSpace(M, mRows, kCols){
+  // Transpose: we want e^T M = 0 ⇔ M^T e = 0 ⇔ find null space of M^T.
+  // Build M^T as (kCols x mRows), do RREF, extract null space columns.
+  // We pack M^T rows as bitsets of length mRows.
+  const W = Math.ceil(mRows/32);
+  const rowsMT = [];
+  for(let f=0;f<kCols;f++){
+    const bits = new Uint32Array(W);
+    for(let i=0;i<mRows;i++){
+      if(M[i*kCols + f]) bits[i>>>5] ^= (1<<(i&31));
+    }
+    rowsMT.push({ bits, rhs: 0 });
+  }
+  // RREF
+  const pivots = new Map();
+  let rIdx = 0;
+  for(let col=0; col<mRows && rIdx<rowsMT.length; col++){
+    let pivot = -1;
+    for(let r=rIdx; r<rowsMT.length; r++){
+      if((rowsMT[r].bits[col>>>5] >>> (col&31)) & 1){ pivot = r; break; }
+    }
+    if(pivot < 0) continue;
+    if(pivot !== rIdx){ const t=rowsMT[rIdx]; rowsMT[rIdx]=rowsMT[pivot]; rowsMT[pivot]=t; }
+    const pr = rowsMT[rIdx];
+    for(let r=0; r<rowsMT.length; r++){
+      if(r===rIdx) continue;
+      if((rowsMT[r].bits[col>>>5] >>> (col&31)) & 1){
+        for(let i=0;i<W;i++) rowsMT[r].bits[i] ^= pr.bits[i];
+      }
+    }
+    pivots.set(col, rIdx);
+    rIdx++;
+  }
+  // Null space: free cols correspond to error patterns. For each free col f,
+  // a basis vector is: e[f]=1, e[pivot_col] = M^T[pivot_row][f].
+  const pivotSet = new Set(pivots.keys());
+  const freeCols = [];
+  for(let c=0;c<mRows;c++) if(!pivotSet.has(c)) freeCols.push(c);
+  // We want L: rows such that L @ e_pat = ... no, wait. The null space of M^T
+  // IS the set of valid error syndromes-equivalence-class. But what we ACTUALLY
+  // want is the parity-check matrix L of the syndrome code.
+  //
+  // For e in {0,1}^mRows, define syndrome σ(e) = "what M-mismatch e produces".
+  // The "code" is the set of e satisfying ... hmm, let's reconsider.
+  //
+  // c = M z + e (over GF(2), z is hidden free-var assignment)
+  //   ⇒ e ≡ c (mod col-space of M)
+  //
+  // So the set of valid error patterns explaining c is { c + Mz : z ∈ {0,1}^k }.
+  // Their pairwise differences are vectors in col(M). The "parity-check matrix"
+  // L of the syndrome code is the left null space of M (rows L such that L M = 0).
+  // The syndrome of e is then L e. Two error patterns have the same syndrome iff
+  // they differ by a codeword (an element of null space of L = column space of M).
+  //
+  // So: codewords of the code are col(M); parity check is left-null(M); both are
+  // what we want. For BP we use L. For "alternative solutions" we use col(M).
+  //
+  // The free cols of RREF(M^T) give a basis for the LEFT null space of M.
+  const Lrows = [];
+  for(const f of freeCols){
+    const Lr = new Uint32Array(W);
+    Lr[f>>>5] ^= (1<<(f&31));
+    for(const [col, ri] of pivots.entries()){
+      if((rowsMT[ri].bits[f>>>5] >>> (f&31)) & 1){
+        Lr[col>>>5] ^= (1<<(col&31));
+      }
+    }
+    Lrows.push(Lr);
+  }
+  return { L: Lrows, mRows, numChecks: Lrows.length, W };
+}
+
+// Compute syndrome s = L @ c
+function computeSyndrome(L, mRows, c){
+  const out = new Uint8Array(L.length);
+  for(let r=0;r<L.length;r++){
+    let v = 0;
+    const Lr = L[r];
+    for(let i=0;i<mRows;i++){
+      if((Lr[i>>>5] >>> (i&31)) & 1) v ^= c[i];
+    }
+    out[r] = v;
+  }
+  return out;
+}
+
+// =============================================================================
+//  Loopy belief propagation on the syndrome Tanner graph.
+//  - variable nodes: m_W witnesses (each variable is "is witness i a liar?")
+//  - check nodes: rows of L (parity checks).
+//  Sum-product in log-likelihood ratio domain. Returns P(liar) per witness.
+// =============================================================================
+function loopyBP(L, mRows, syndrome, prior_p=0.12, iters=60, damping=0.4){
+  const numChecks = L.length;
+  const W = L[0] ? L[0].length : 0;
+
+  // Build neighborhood lists
+  const checkVars = [];
+  const varChecks = Array.from({length:mRows}, () => []);
+  for(let a=0;a<numChecks;a++){
+    const nbrs = [];
+    for(let i=0;i<mRows;i++){
+      if((L[a][i>>>5] >>> (i&31)) & 1){
+        nbrs.push(i);
+        varChecks[i].push(a);
+      }
+    }
+    checkVars.push(nbrs);
+  }
+
+  const priorLLR = Math.log((1 - prior_p) / Math.max(prior_p, 1e-9));
+  // Sparse message storage: msgVC[a][i] indexed by check
+  const msgVC = checkVars.map(nbrs => new Float32Array(nbrs.length));
+  const msgCV = checkVars.map(nbrs => new Float32Array(nbrs.length));
+
+  for(let it=0; it<iters; it++){
+    // Update var->check
+    for(let i=0;i<mRows;i++){
+      let total = priorLLR;
+      for(const a of varChecks[i]){
+        const idx = checkVars[a].indexOf(i);
+        total += msgCV[a][idx];
+      }
+      for(const a of varChecks[i]){
+        const idx = checkVars[a].indexOf(i);
+        const out = total - msgCV[a][idx];
+        msgVC[a][idx] = damping * msgVC[a][idx] + (1 - damping) * out;
+      }
+    }
+    // Update check->var
+    for(let a=0;a<numChecks;a++){
+      const nbrs = checkVars[a];
+      if(nbrs.length === 0) continue;
+      const sign = syndrome[a] ? -1.0 : 1.0;
+      const tanhs = new Float32Array(nbrs.length);
+      let prod = 1.0;
+      for(let k=0;k<nbrs.length;k++){
+        const t = Math.tanh(msgVC[a][k]/2);
+        tanhs[k] = t;
+        prod *= t;
+      }
+      for(let k=0;k<nbrs.length;k++){
+        let p;
+        const tk = tanhs[k];
+        if(Math.abs(tk) >= 1 - 1e-12){
+          p = 1.0;
+          for(let q=0;q<nbrs.length;q++) if(q!==k) p *= tanhs[q];
+        } else {
+          p = prod / tk;
+        }
+        p = Math.max(-1+1e-9, Math.min(1-1e-9, p));
+        const out = sign * 2.0 * Math.atanh(p);
+        msgCV[a][k] = damping * msgCV[a][k] + (1 - damping) * out;
+      }
+    }
+  }
+
+  // Final beliefs
+  const beliefs = new Float32Array(mRows);
+  for(let i=0;i<mRows;i++){
+    let total = priorLLR;
+    for(const a of varChecks[i]){
+      const idx = checkVars[a].indexOf(i);
+      total += msgCV[a][idx];
+    }
+    beliefs[i] = 1.0 / (1.0 + Math.exp(total));   // P(liar)
+  }
+  return { beliefs, checkVars, varChecks };
+}
+
+// Hard-decision decode: threshold beliefs, then verify syndrome.
+function decodeFromBeliefs(beliefs, L, mRows, syndrome){
+  const e = new Uint8Array(mRows);
+  for(let i=0;i<mRows;i++) e[i] = beliefs[i] > 0.5 ? 1 : 0;
+  // Try to fix unsatisfied checks by greedy bit flipping (one round)
+  const checkOk = checkAllParities(L, e, syndrome);
+  if(checkOk) return e;
+  // bit-flip heuristic: for each unsatisfied check, flip the var with highest belief
+  for(let a=0;a<L.length;a++){
+    let parity = 0;
+    const nbrs = [];
+    for(let i=0;i<mRows;i++){
+      if((L[a][i>>>5] >>> (i&31)) & 1){
+        nbrs.push(i);
+        parity ^= e[i];
+      }
+    }
+    if(parity !== syndrome[a]){
+      let best = -1, bestB = -1;
+      for(const i of nbrs){
+        if(beliefs[i] > bestB){ bestB = beliefs[i]; best = i; }
+      }
+      if(best >= 0) e[best] ^= 1;
+    }
+  }
+  return e;
+}
+function checkAllParities(L, e, syndrome){
+  for(let a=0;a<L.length;a++){
+    let parity = 0;
+    for(let i=0;i<e.length;i++){
+      if((L[a][i>>>5] >>> (i&31)) & 1) parity ^= e[i];
+    }
+    if(parity !== syndrome[a]) return false;
+  }
+  return true;
+}
+
+// =============================================================================
+//  Alternative-candidate search: find sibling error patterns within ±delta of
+//  the chosen weight by sampling low-weight codewords. Returns sibling list.
+// =============================================================================
+function siblingCandidates(e, M, mRows, kCols, weight, maxSamples=4000, rng){
+  // Codewords are vectors in col(M). Sample random z ∈ {0,1}^kCols, compute Mz,
+  // XOR with e, keep results of same (minimum) weight.
+  const sibs = [];
+  const eW = weight;
+  const seen = new Set();
+  seen.add(e.join(''));
+  for(let s=0;s<maxSamples;s++){
+    // Bias z to sparse: random subset of size 1..3
+    const z = new Uint8Array(kCols);
+    const sz = 1 + Math.floor(rng()*3);
+    for(let i=0;i<sz;i++) z[Math.floor(rng()*kCols)] ^= 1;
+    const cand = new Uint8Array(mRows);
+    let w = 0;
+    for(let i=0;i<mRows;i++){
+      let v = e[i];
+      for(let f=0;f<kCols;f++){
+        if(z[f] && M[i*kCols + f]) v ^= 1;
+      }
+      cand[i] = v;
+      if(v) w++;
+    }
+    if(w === eW){
+      const key = cand.join('');
+      if(!seen.has(key)){ seen.add(key); sibs.push(cand); }
+      if(sibs.length >= 8) break;
+    }
+  }
+  return sibs;
+}
+
+// =============================================================================
+//  Code minimum distance: exact if column space small, otherwise sampled upper.
+// =============================================================================
+function codeMinDistance(M, mRows, kCols, maxExact=18){
+  if(kCols <= maxExact){
+    // Enumerate all 2^kCols codewords c = M z
+    let dMin = Infinity;
+    const z = new Uint8Array(kCols);
+    const total = 1 << kCols;
+    for(let n=1;n<total;n++){
+      // increment z
+      for(let bit=0;bit<kCols;bit++){
+        z[bit] = (n >> bit) & 1;
+      }
+      let w = 0;
+      for(let i=0;i<mRows;i++){
+        let v = 0;
+        for(let f=0;f<kCols;f++){
+          if(z[f] && M[i*kCols+f]) v ^= 1;
+        }
+        if(v) w++;
+      }
+      if(w > 0 && w < dMin) dMin = w;
+    }
+    return { d: isFinite(dMin) ? dMin : 0, tag: 'exact' };
+  }
+  // Sampled upper bound: random low-weight z's, take min nonzero weight.
+  let dMin = Infinity;
+  for(let s=0;s<5000;s++){
+    const z = new Uint8Array(kCols);
+    const sz = 1 + Math.floor(Math.random() * Math.min(kCols, 4));
+    for(let i=0;i<sz;i++) z[Math.floor(Math.random()*kCols)] ^= 1;
+    let w = 0, any = 0;
+    for(let i=0;i<mRows;i++){
+      let v = 0;
+      for(let f=0;f<kCols;f++){
+        if(z[f] && M[i*kCols+f]) v ^= 1;
+      }
+      if(v){ w++; any = 1; }
+    }
+    if(any && w < dMin) dMin = w;
+  }
+  return { d: isFinite(dMin) ? dMin : 0, tag: 'sampled≤' };
+}
+
+// =============================================================================
+//  Bootstrap verification on T_B rows
+// =============================================================================
+function bootstrapVerify(cs, xHat){
+  const TB = cs.rows.filter(r => r.kind === 1);
+  let match = 0;
+  for(const r of TB){
+    let v = 0;
+    for(let j=0;j<cs.n;j++) if(GF2.getBit(r, j)) v ^= xHat[j];
+    if(v === r.rhs) match++;
+  }
+  return { match, total: TB.length };
+}
+
+// Reconstruct x_hat from a cleaned system (T_A + uncorrupted witnesses)
+function reconstructX(cs, lyingWitnessSet, n){
+  const sub = new GF2(n);
+  for(let i=0;i<cs.rows.length;i++){
+    const r = cs.rows[i];
+    if(r.kind === 1) continue;          // exclude held-out
+    if(r.kind === 2 && lyingWitnessSet.has(i)) continue;
+    sub.rows.push(GF2.cloneRow(r));
+  }
+  const { out, inconsistent } = sub.solveSubset(_ => true);
+  const x = new Uint8Array(n);
+  for(let i=0;i<n;i++) x[i] = out[i].forced ? out[i].value : 0;
+  return { x, inconsistent };
+}
+
+// =============================================================================
+//  Active interrogation: for each pair of candidate error patterns we have
+//  a corresponding x_hat. Greedily pick bits that maximally split candidates.
+// =============================================================================
+function suggestInterrogation(candidateWorlds){
+  if(candidateWorlds.length <= 1) return [];
+  const n = candidateWorlds[0].length;
+  const plan = [];
+  let surviving = candidateWorlds.map((_, i) => i);
+  const used = new Set();
+  while(surviving.length > 1){
+    let bestBit = -1, bestSplit = -1;
+    for(let bit=0; bit<n; bit++){
+      if(used.has(bit)) continue;
+      let zeros = 0;
+      for(const k of surviving) if(candidateWorlds[k][bit] === 0) zeros++;
+      const ones = surviving.length - zeros;
+      const split = Math.min(zeros, ones);
+      if(split > bestSplit){ bestSplit = split; bestBit = bit; }
+    }
+    if(bestBit < 0 || bestSplit === 0) break;
+    plan.push(bestBit);
+    used.add(bestBit);
+    // optimistically keep the larger half
+    let zeros = 0;
+    for(const k of surviving) if(candidateWorlds[k][bestBit] === 0) zeros++;
+    if(zeros >= surviving.length - zeros){
+      surviving = surviving.filter(k => candidateWorlds[k][bestBit] === 0);
+    } else {
+      surviving = surviving.filter(k => candidateWorlds[k][bestBit] === 1);
+    }
+  }
+  return plan;
+}
+
+// =============================================================================
+//  PRNG (mulberry32)
+// =============================================================================
+function rngFrom(seed){
+  let s = (seed>>>0) || 1;
+  return function(){
+    s |= 0; s = (s + 0x6D2B79F5) | 0;
+    let t = s;
+    t = Math.imul(t ^ (t>>>15), t | 1);
+    t ^= t + Math.imul(t ^ (t>>>7), t | 61);
+    return ((t ^ (t>>>14)) >>> 0) / 4294967296;
+  };
+}
+
+// =============================================================================
+//  WebGL setup
+// =============================================================================
+const canvas = document.getElementById('c');
+const gl = canvas.getContext('webgl', { antialias:true, premultipliedAlpha:false, alpha:true });
+if(!gl){ document.body.innerHTML = '<p style="color:#f88;padding:20px">WebGL not available.</p>'; return; }
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE);             // additive for edges
+
+function compile(type, src){
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+    const log = gl.getShaderInfoLog(s);
+    console.error('Shader compile error:\n' + log + '\nSource:\n' + src);
+    throw new Error('shader compile: ' + log);
+  }
+  return s;
+}
+function link(vs, fs){
+  const p = gl.createProgram();
+  gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+  if(!gl.getProgramParameter(p, gl.LINK_STATUS)){
+    console.error(gl.getProgramInfoLog(p)); throw new Error('link');
+  }
+  return p;
+}
+
+const vert      = compile(gl.VERTEX_SHADER,   document.getElementById('vert').textContent);
+const fragLat   = compile(gl.FRAGMENT_SHADER, document.getElementById('frag-lattice').textContent);
+const vertEdge  = compile(gl.VERTEX_SHADER,   document.getElementById('vert-edge').textContent);
+const fragEdge  = compile(gl.FRAGMENT_SHADER, document.getElementById('frag-edge').textContent);
+const progLat   = link(vert, fragLat);
+const progEdge  = link(vertEdge, fragEdge);
+
+// Lattice quad
+const quadBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+
+// Lattice uniforms
+const U = {
+  res:     gl.getUniformLocation(progLat, 'iResolution'),
+  time:    gl.getUniformLocation(progLat, 'iTime'),
+  mouse:   gl.getUniformLocation(progLat, 'iMouse'),
+  mouseT:  gl.getUniformLocation(progLat, 'iMouseT'),
+  phase:   gl.getUniformLocation(progLat, 'iPhase'),
+  scrub:   gl.getUniformLocation(progLat, 'iScrub'),
+  liars:   gl.getUniformLocation(progLat, 'iLiars'),
+  halo:    gl.getUniformLocation(progLat, 'iHalo'),
+  anim:    gl.getUniformLocation(progLat, 'iAnim'),
+  bp:      gl.getUniformLocation(progLat, 'iBP'),
+  grid:    gl.getUniformLocation(progLat, 'iGrid'),
+  lat:     gl.getUniformLocation(progLat, 'iLattice'),
+  N:       gl.getUniformLocation(progLat, 'iN'),
+  dmin:    gl.getUniformLocation(progLat, 'iDmin'),
+  side:    gl.getUniformLocation(progLat, 'iLatticeSidePx'),
+  origin:  gl.getUniformLocation(progLat, 'iLatticeOriginPx'),
+};
+const UE = {
+  time:    gl.getUniformLocation(progEdge, 'iTime'),
+  bp:      gl.getUniformLocation(progEdge, 'iBP'),
+  anim:    gl.getUniformLocation(progEdge, 'iAnim'),
+};
+
+const tex = gl.createTexture();
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+// Edge buffers
+const edgeBuf = gl.createBuffer();
+let edgeVertexCount = 0;
+const FLOATS_PER_VERTEX = 10;   // pos.xy, uv.xy, color.rgba, phase, kind
+
+// =============================================================================
+//  Application state
+// =============================================================================
+const state = {
+  seed: (Math.random()*1e9)|0,
+  N: 20,
+  density: 0.32,
+  nLiars: 3,
+  phase: 4,                       // current visualization phase
+  scrub: 1.0,                     // 0..1 collapse-order scrubber
+  liars: 1,
+  halo: 0,
+  anim: 1,
+  bp: 1,
+  edges: 1,
+  interrog: 0,
+  probe: 'measure',
+  mouse: [0,0], mouseT: -1e3,
+  scenario: null,
+  // derived
+  cs: null, truth: null, cellBlock: null, nBlocks: 0,
+  solvedFull: null,               // out, inconsistent  (T_A only — for visualization of phase 2)
+  solvedIntra: null,              // intra-block only   (phase 1)
+  solvedAll: null,                // T_A + clean witnesses (final)
+  corruptedSet: new Set(),        // ground-truth liars
+  detectedSet: new Set(),         // syndrome-decoded liars
+  syndromeProb: null,             // {x0, basis, freeCols, W, c, M, mRows, kCols}
+  syndromeL: null,                // {L, mRows, numChecks, W}
+  syndromeS: null,
+  beliefs: null,
+  candidates: [],                 // list of error patterns at min weight
+  candidateWorlds: [],            // implied x's for each candidate
+  interrogPlan: [],
+  inspections: 0,
+  overrides: new Map(),
+  dMin: 0, dMinTag: '—', tStar: 0,
+  bootstrap: { match: 0, total: 0 },
+  collapseOrder: null,
+};
+
+function toast(msg, ms=1600){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> el.classList.remove('show'), ms);
+}
+
+function rebuildWorld(){
+  const rng = rngFrom(state.seed);
+  const { cs, truth, cellBlock, nBlocks } = buildWorld(state.N, state.density, rng);
+  state.cs = cs;
+  state.truth = truth;
+  state.cellBlock = cellBlock;
+  state.nBlocks = nBlocks;
+  state.overrides.clear();
+  state.inspections = 0;
+  // Inject liars
+  if(state.liars){
+    state.corruptedSet = injectLies(cs, state.nLiars, rng);
+  } else {
+    state.corruptedSet = new Set();
+  }
+  // Solve subsets
+  state.solvedIntra = cs.solveSubset(r => r.kind === 0 && r.intraBlock);
+  state.solvedFull  = cs.solveSubset(r => r.kind === 0);
+  // Compute collapse order: row of cs's RREF order for each variable
+  computeCollapseOrder();
+  // Forensic pipeline
+  runForensicPipeline();
+  // x_hat for visualization in syndrome phase
+  const lying = state.detectedSet;
+  const recon = reconstructX(cs, lying, cs.n);
+  state.xHat = recon.x;
+  state.bootstrap = bootstrapVerify(cs, recon.x);
+  uploadLattice();
+  uploadEdges();
+  updateHUD();
+}
+
+function computeCollapseOrder(){
+  // Approximate collapse order: by block hue + var index. For visual scrub.
+  const n = state.N*state.N;
+  const order = new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const b = state.cellBlock[i];
+    // intra-block within first 0..0.5; cross-block 0.5..1.0
+    order[i] = (b / Math.max(1, state.nBlocks)) * 0.5 + ((i*2654435761)&255)/512.0;
+  }
+  state.collapseOrder = order;
+}
+
+function runForensicPipeline(){
+  state.detectedSet = new Set();
+  state.candidates = [];
+  state.candidateWorlds = [];
+  state.interrogPlan = [];
+  if(!state.cs) return;
+  if(state.corruptedSet.size === 0){
+    state.dMin = 0; state.dMinTag = '—'; state.tStar = 0;
+    state.syndromeProb = null;
+    state.syndromeL = null;
+    state.beliefs = null;
+    state.syndromeS = null;
+    return;
+  }
+  state.syndromeProb = projectSyndrome(state.cs);
+  const { M, mRows, kCols, W, c } = state.syndromeProb;
+  if(mRows === 0 || kCols === 0){ return; }
+  state.syndromeL = leftNullSpace(M, mRows, kCols);
+  state.syndromeS = computeSyndrome(state.syndromeL.L, mRows, c);
+
+  const dInfo = codeMinDistance(M, mRows, kCols, 18);
+  state.dMin = dInfo.d;
+  state.dMinTag = dInfo.tag;
+  state.tStar = Math.max(0, Math.floor((state.dMin - 1)/2));
+
+  if(state.syndromeL.numChecks === 0){
+    // No checks — every error pattern is "valid"; can't decode.
+    state.detectedSet = new Set();
+    return;
+  }
+
+  const bp = loopyBP(state.syndromeL.L, mRows, state.syndromeS, 0.10, 80, 0.4);
+  state.beliefs = bp.beliefs;
+  const eHat = decodeFromBeliefs(bp.beliefs, state.syndromeL.L, mRows, state.syndromeS);
+
+  // Verify
+  const ok = checkAllParities(state.syndromeL.L, eHat, state.syndromeS);
+  // Map e back to witness row indices in cs
+  const witnessRowIdx = [];
+  for(let i=0;i<state.cs.rows.length;i++) if(state.cs.rows[i].kind === 2) witnessRowIdx.push(i);
+
+  state.candidates = [eHat];
+  state.detectedSet = new Set();
+  for(let i=0;i<eHat.length;i++) if(eHat[i]) state.detectedSet.add(witnessRowIdx[i]);
+
+  // Sibling search for ambiguous regime
+  const eWeight = popcount8(eHat);
+  const rng = rngFrom(state.seed ^ 0xabc);
+  const sibs = siblingCandidates(eHat, M, mRows, kCols, eWeight, 4000, rng);
+  for(const s of sibs) state.candidates.push(s);
+
+  // Compute implied worlds for each candidate (using corrupted set === candidate)
+  state.candidateWorlds = state.candidates.map(e => {
+    const lying = new Set();
+    for(let i=0;i<e.length;i++) if(e[i]) lying.add(witnessRowIdx[i]);
+    const { x } = reconstructX(state.cs, lying, state.cs.n);
+    return x;
+  });
+
+  if(state.candidates.length > 1 && state.interrog){
+    state.interrogPlan = suggestInterrogation(state.candidateWorlds);
+  }
+}
+
+function popcount8(arr){ let c=0; for(let i=0;i<arr.length;i++) if(arr[i]) c++; return c; }
+
+// =============================================================================
+//  Lattice texture upload
+//   R = forcedFlag (255/0)
+//   G = state (255/0)
+//   B = mask flags packed:
+//        bit0: gt liar (variable is in a corrupted witness)
+//        bit1: detected liar
+//        bit2: held-out region (variable participates in T_B only)
+//        bit3: on-syndrome (in a check whose syndrome bit is 1)
+//        bit4: distinguishing bit (active interrogation hint)
+//   A = blockHue (golden-ratio hash of block id)
+// =============================================================================
+function uploadLattice(){
+  const N = state.N;
+  const n = N*N;
+  const pix = new Uint8Array(n*4);
+  const solved = pickSolvedForPhase();
+  const inOverride = i => state.overrides.has(i);
+
+  // Pre-compute which vars participate in T_B
+  const inTB = new Uint8Array(n);
+  for(const r of state.cs.rows){
+    if(r.kind !== 1) continue;
+    for(let j=0;j<n;j++) if(GF2.getBit(r, j)) inTB[j] = 1;
+  }
+  // Vars in corrupted witnesses (ground truth)
+  const gtLiarVar = new Uint8Array(n);
+  if(state.liars){
+    for(const ri of state.corruptedSet){
+      const r = state.cs.rows[ri];
+      for(let j=0;j<n;j++) if(GF2.getBit(r, j)) gtLiarVar[j] = 1;
+    }
+  }
+  // Vars in detected witnesses
+  const detLiarVar = new Uint8Array(n);
+  for(const ri of state.detectedSet){
+    const r = state.cs.rows[ri];
+    for(let j=0;j<n;j++) if(GF2.getBit(r, j)) detLiarVar[j] = 1;
+  }
+  // Vars on-syndrome: those in any witness whose syndrome-bit is 1.
+  // We approximate by union of vars in detected witnesses (subset).
+  const onSyn = detLiarVar;
+  // Distinguishing bits from active interrogation
+  const distinguish = new Uint8Array(n);
+  if(state.interrog){
+    for(const b of state.interrogPlan) distinguish[b] = 1;
+  }
+
+  // Block hue lookup
+  const hueFor = b => Math.floor(((b+1) * 2654435761) % 256);
+
+  for(let i=0;i<n;i++){
+    let cell = solved.out[i];
+    if(inOverride(i)) cell = state.overrides.get(i);
+    let mask = 0;
+    if(gtLiarVar[i])     mask |= 1;
+    if(detLiarVar[i])    mask |= 2;
+    if(inTB[i])          mask |= 4;
+    if(onSyn[i])         mask |= 8;
+    if(distinguish[i])   mask |= 16;
+    pix[i*4+0] = cell.forced ? 255 : 0;
+    pix[i*4+1] = cell.value  ? 255 : 0;
+    pix[i*4+2] = mask;
+    pix[i*4+3] = hueFor(state.cellBlock[i]);
+  }
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, N, N, 0, gl.RGBA, gl.UNSIGNED_BYTE, pix);
+  gl.uniform1i(U.lat, 0);
+}
+
+function pickSolvedForPhase(){
+  if(state.phase <= 0.5) return { out: blankSolve(state.cs.n), inconsistent:false };
+  if(state.phase <= 1.5) return state.solvedIntra;
+  if(state.phase <= 2.5) return state.solvedFull;
+  // Phase 3, 4: use full T_A + reconstruction (best assignment to date)
+  if(state.xHat){
+    const out = state.xHat.map ? null : null;
+    const arr = new Array(state.cs.n);
+    for(let i=0;i<state.cs.n;i++) arr[i] = { forced:true, value: state.xHat[i] };
+    return { out: arr, inconsistent:false };
+  }
+  return state.solvedFull;
+}
+function blankSolve(n){ const o = new Array(n); for(let i=0;i<n;i++) o[i] = { forced:false, value:0 }; return o; }
+
+// =============================================================================
+//  Edge geometry: build a vertex buffer of quad strips for each rendered
+//  constraint segment. For each constraint with vars [v0..vk], we draw
+//  chain segments v_i -> v_{i+1}. Limit to MAX_EDGES interesting edges.
+// =============================================================================
+const MAX_EDGES = 1400;
+
+const KIND_COLOR = {
+  // r, g, b, intensity
+  0: [0.45, 0.85, 1.0,  0.55],   // trusted-A (cyan)
+  1: [0.45, 0.55, 0.80, 0.30],   // trusted-B (faded blue/grey, held out)
+  2: [0.75, 0.60, 1.0,  0.55],   // witness (violet)
+  3: [1.0,  0.30, 0.45, 1.10],   // corrupted (red, bright)
+  4: [1.0,  0.85, 0.55, 0.95],   // BP message (amber)
+};
+
+function uploadEdges(){
+  if(!state.cs){ edgeVertexCount = 0; return; }
+  const N = state.N;
+  const cw = gl.canvas.width, ch = gl.canvas.height;
+  const side = Math.min(cw, ch);
+  const cellPx = side / N;
+  const origin = [(cw - side)*0.5, (ch - side)*0.5];
+  state._latticeSidePx = side;
+  state._latticeOriginPx = origin;
+
+  // Compose edge list
+  const edges = [];  // each: { ax, ay, bx, by, kind, intensity, phase }
+  function cellCenterPx(idx){
+    const cx = idx % N;
+    const cy = Math.floor(idx / N);
+    return [origin[0] + (cx + 0.5)*cellPx, origin[1] + (cy + 0.5)*cellPx];
+  }
+  const corrupted = state.corruptedSet;
+  // For each constraint pick chain edges
+  for(let ri=0; ri<state.cs.rows.length; ri++){
+    const r = state.cs.rows[ri];
+    if(r.kind === 1 && !state.edges) continue;
+    const vars = state.cs.varsOf(r);
+    if(vars.length < 2) continue;
+    const isCorrupted = (r.kind === 2 && corrupted.has(ri) && state.liars);
+    const kind = isCorrupted ? 3 : r.kind;
+    const baseColor = KIND_COLOR[kind];
+    const phase = ((ri * 9301 + 49297) % 233280) / 233280;
+    for(let i=0;i<vars.length-1;i++){
+      const [ax, ay] = cellCenterPx(vars[i]);
+      const [bx, by] = cellCenterPx(vars[i+1]);
+      edges.push({ ax, ay, bx, by, kind, color:baseColor, phase });
+    }
+  }
+  // BP edges: animated overlays from detected witnesses' var-chains
+  if(state.bp){
+    for(const ri of state.detectedSet){
+      const r = state.cs.rows[ri];
+      const vars = state.cs.varsOf(r);
+      const phase = (ri * 0.13) % 1.0;
+      for(let i=0;i<vars.length-1;i++){
+        const [ax, ay] = cellCenterPx(vars[i]);
+        const [bx, by] = cellCenterPx(vars[i+1]);
+        edges.push({ ax, ay, bx, by, kind:4, color: KIND_COLOR[4], phase });
+      }
+    }
+  }
+  if(edges.length === 0){ edgeVertexCount = 0; return; }
+
+  // Truncate / sort: corrupted + BP first (highest visual priority)
+  edges.sort((a,b) => {
+    const pa = (a.kind === 3) ? 0 : (a.kind === 4) ? 1 : 2 + a.kind;
+    const pb = (b.kind === 3) ? 0 : (b.kind === 4) ? 1 : 2 + b.kind;
+    return pa - pb;
+  });
+  if(edges.length > MAX_EDGES) edges.length = MAX_EDGES;
+
+  // Build vertex array
+  const thickness = Math.max(2.5, cellPx * 0.06);
+  const arr = new Float32Array(edges.length * 6 * FLOATS_PER_VERTEX);
+  let ptr = 0;
+  for(const e of edges){
+    const dx = e.bx - e.ax, dy = e.by - e.ay;
+    const len = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx = -dy/len, ny = dx/len;
+    const tx = nx * thickness*0.5, ty = ny * thickness*0.5;
+    // 4 corners
+    const ax1 = e.ax + tx, ay1 = e.ay + ty;
+    const ax2 = e.ax - tx, ay2 = e.ay - ty;
+    const bx1 = e.bx + tx, by1 = e.by + ty;
+    const bx2 = e.bx - tx, by2 = e.by - ty;
+    // Convert to NDC
+    function ndc(x, y){
+      return [ (x/cw)*2 - 1, (y/ch)*2 - 1 ];
+    }
+    const A1 = ndc(ax1, ay1), A2 = ndc(ax2, ay2);
+    const B1 = ndc(bx1, by1), B2 = ndc(bx2, by2);
+    const c = e.color;
+    const k = e.kind;
+    const p = e.phase;
+    // 6 vertices forming 2 tris: (A1, A2, B1), (A2, B2, B1)
+    function emit(pos, uv){
+      arr[ptr++] = pos[0]; arr[ptr++] = pos[1];
+      arr[ptr++] = uv[0]; arr[ptr++] = uv[1];
+      arr[ptr++] = c[0]; arr[ptr++] = c[1]; arr[ptr++] = c[2]; arr[ptr++] = c[3];
+      arr[ptr++] = p;
+      arr[ptr++] = k;
+    }
+    emit(A1, [0, +1]); emit(A2, [0, -1]); emit(B1, [1, +1]);
+    emit(A2, [0, -1]); emit(B2, [1, -1]); emit(B1, [1, +1]);
+  }
+  edgeVertexCount = ptr / FLOATS_PER_VERTEX;
+  gl.bindBuffer(gl.ARRAY_BUFFER, edgeBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, arr, gl.DYNAMIC_DRAW);
+}
+
+// =============================================================================
+//  Render
+// =============================================================================
+function setupEdgeAttribs(){
+  gl.bindBuffer(gl.ARRAY_BUFFER, edgeBuf);
+  const stride = FLOATS_PER_VERTEX * 4;
+  let off = 0;
+  function attr(name, size){
+    const loc = gl.getAttribLocation(progEdge, name);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, stride, off);
+    off += size*4;
+  }
+  attr('a_pos', 2);
+  attr('a_uv', 2);
+  attr('a_color', 4);
+  attr('a_phase', 1);
+  attr('a_kind', 1);
+}
+
+function setupLatticeAttribs(){
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+  const loc = gl.getAttribLocation(progLat, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+}
+
+function renderFrame(t){
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0.012, 0.014, 0.022, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Lattice (opaque base)
+  gl.disable(gl.BLEND);
+  gl.useProgram(progLat);
+  setupLatticeAttribs();
+  gl.uniform2f(U.res, canvas.width, canvas.height);
+  gl.uniform1f(U.time, t);
+  gl.uniform2f(U.mouse, state.mouse[0], state.mouse[1]);
+  gl.uniform1f(U.mouseT, state.mouseT);
+  gl.uniform1f(U.phase, state.phase);
+  gl.uniform1f(U.scrub, state.scrub);
+  gl.uniform1f(U.liars, state.liars);
+  gl.uniform1f(U.halo, state.halo);
+  gl.uniform1f(U.anim, state.anim);
+  gl.uniform1f(U.bp, state.bp);
+  gl.uniform1f(U.grid, state.N);
+  gl.uniform1f(U.N, state.N);
+  gl.uniform1f(U.dmin, state.dMin);
+  const side = Math.min(canvas.width, canvas.height);
+  const ox = (canvas.width - side) * 0.5;
+  const oy = (canvas.height - side) * 0.5;
+  state._latticeSidePx = side;
+  state._latticeOriginPx = [ox, oy];
+  gl.uniform1f(U.side, side);
+  gl.uniform2f(U.origin, ox, oy);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+  // Edges (additive)
+  if(state.edges && edgeVertexCount > 0){
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.useProgram(progEdge);
+    setupEdgeAttribs();
+    gl.uniform1f(UE.time, t);
+    gl.uniform1f(UE.bp, state.bp);
+    gl.uniform1f(UE.anim, state.anim);
+    gl.drawArrays(gl.TRIANGLES, 0, edgeVertexCount);
+  }
+}
+
+// =============================================================================
+//  HUD
+// =============================================================================
+const $ = id => document.getElementById(id);
+
+function updateHUD(){
+  const cs = state.cs;
+  if(!cs){ return; }
+  const N = state.N, n = N*N;
+  let forced=0, free=0;
+  const solved = pickSolvedForPhase();
+  for(let i=0;i<n;i++){
+    const c = state.overrides.get(i) || solved.out[i];
+    if(c.forced) forced++; else free++;
+  }
+  let cTA=0, cTB=0, cW=0;
+  for(const r of cs.rows){
+    if(r.kind === 0) cTA++;
+    else if(r.kind === 1) cTB++;
+    else cW++;
+  }
+  $('vars').textContent = n;
+  $('blocks').textContent = state.nBlocks;
+  $('cons').textContent = cs.rows.length;
+  $('cTA').textContent = cTA;
+  $('cTB').textContent = cTB;
+  $('cW').textContent = cW;
+  $('forced').textContent = forced;
+  $('free').textContent = free;
+  $('kA').textContent = state.syndromeProb ? state.syndromeProb.kCols : '—';
+  $('dmin').textContent = state.dMin || '—';
+  $('dminTag').textContent = state.dMinTag;
+  $('tstar').textContent = state.tStar;
+  $('actLiars').textContent = state.corruptedSet.size;
+  $('detLiars').textContent = state.detectedSet.size;
+  const actual = state.corruptedSet;
+  const detected = state.detectedSet;
+  let inter = 0;
+  for(const r of detected) if(actual.has(r)) inter++;
+  let detBadgeText, detBadgeCls;
+  if(actual.size === 0){
+    detBadgeText = 'idle'; detBadgeCls = '';
+  } else if(detected.size === 0){
+    detBadgeText = 'none'; detBadgeCls = 'warn';
+  } else if(detected.size === actual.size && inter === actual.size){
+    detBadgeText = '✓ perfect'; detBadgeCls = 'ok';
+  } else {
+    detBadgeText = inter + '/' + actual.size; detBadgeCls = inter === actual.size ? 'ok' : 'warn';
+  }
+  const detBadge = $('detBadge');
+  detBadge.textContent = detBadgeText;
+  detBadge.className = 'badge ' + detBadgeCls;
+  $('candidates').textContent = state.candidates.length || '—';
+  $('inspections').textContent = state.inspections;
+  const bs = state.bootstrap;
+  $('bootstrap').textContent = (bs.match) + '/' + bs.total;
+  const bb = $('bootBadge');
+  if(bs.total === 0){
+    bb.textContent = '—'; bb.className = 'badge';
+  } else if(bs.match === bs.total){
+    bb.textContent = '✓ verified'; bb.className = 'badge ok';
+  } else {
+    bb.textContent = '✗ failed'; bb.className = 'badge fail';
+  }
+  const labels = {0:'0 · init', 1:'1 · intra-block', 2:'2 · cross-block', 3:'3 · BP', 4:'4 · syndrome decode'};
+  $('phaseLbl').textContent = labels[state.phase] || ('? ' + state.phase);
+  // theorem panel
+  $('thmD').textContent = state.dMin || '—';
+  $('thmT').textContent = state.tStar;
+  $('thmActual').textContent = state.corruptedSet.size;
+  $('thmDetected').textContent = state.detectedSet.size;
+}
+
+// =============================================================================
+//  UI wiring
+// =============================================================================
+function setToggle(btn, on){
+  if(on) btn.classList.add('on'); else btn.classList.remove('on');
+}
+function bindGroup(containerId, attr, onPick){
+  const c = document.getElementById(containerId);
+  c.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      c.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      onPick(b.dataset[attr]);
+    });
+  });
+}
+bindGroup('phaseBtns', 'phase', v => {
+  state.phase = +v;
+  state.scrub = (v == 0) ? 0 : (v == 1) ? 0.5 : 1.0;
+  $('phaseSlider').value = state.scrub;
+  uploadLattice(); uploadEdges(); updateHUD();
+});
+bindGroup('probeBtns', 'probe', v => { state.probe = v; });
+bindGroup('gridBtns',  'grid',  v => { state.N = +v; rebuildWorld(); });
+
+$('phaseSlider').addEventListener('input', e => {
+  state.scrub = +e.target.value;
+});
+
+document.querySelectorAll('#scenarioBtns button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#scenarioBtns button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    applyScenario(b.dataset.scenario);
+  });
+});
+
+$('liarsBtn').addEventListener('click', () => {
+  state.liars = 1 - state.liars;
+  $('liarsBtn').textContent = state.liars ? 'ON' : 'OFF';
+  setToggle($('liarsBtn'), state.liars);
+  rebuildWorld();
+});
+$('edgesBtn').addEventListener('click', () => {
+  state.edges = 1 - state.edges;
+  $('edgesBtn').textContent = state.edges ? 'ON' : 'OFF';
+  setToggle($('edgesBtn'), state.edges);
+  uploadEdges();
+});
+$('bpBtn').addEventListener('click', () => {
+  state.bp = 1 - state.bp;
+  $('bpBtn').textContent = state.bp ? 'ON' : 'OFF';
+  setToggle($('bpBtn'), state.bp);
+  uploadEdges();
+});
+$('haloBtn').addEventListener('click', () => {
+  state.halo = 1 - state.halo;
+  $('haloBtn').textContent = state.halo ? 'ON' : 'OFF';
+  setToggle($('haloBtn'), state.halo);
+});
+$('interrogBtn').addEventListener('click', () => {
+  state.interrog = 1 - state.interrog;
+  $('interrogBtn').textContent = state.interrog ? 'ON' : 'OFF';
+  setToggle($('interrogBtn'), state.interrog);
+  runForensicPipeline();
+  uploadLattice();
+  uploadEdges();
+  updateHUD();
+});
+$('density').addEventListener('input', e => {
+  state.density = +e.target.value;
+  $('densityVal').textContent = state.density.toFixed(2).replace(/^0/,'');
+});
+$('density').addEventListener('change', () => rebuildWorld());
+$('nLiars').addEventListener('input', e => {
+  state.nLiars = +e.target.value;
+  $('nLiarsVal').textContent = state.nLiars;
+});
+$('nLiars').addEventListener('change', () => rebuildWorld());
+
+$('reseedBtn').addEventListener('click', () => { state.seed = (Math.random()*1e9)|0; rebuildWorld(); });
+$('decodeBtn').addEventListener('click', () => { runForensicPipeline(); uploadLattice(); uploadEdges(); updateHUD(); toast('syndrome decode complete'); });
+
+$('theoremBtn').addEventListener('click', () => {
+  const tp = $('theorem');
+  tp.classList.toggle('shown');
+});
+$('theoremClose').addEventListener('click', () => $('theorem').classList.remove('shown'));
+
+// Help panel collapse
+$('helpToggle').addEventListener('click', () => {
+  const help = $('help');
+  help.classList.toggle('collapsed');
+  $('helpToggle').textContent = help.classList.contains('collapsed') ? '▸' : '▾';
+});
+
+// Scenarios
+function applyScenario(name){
+  state.scenario = name;
+  // First, ensure we have a d_min estimate. If not, do a probe run.
+  if(state.dMin === 0){
+    state.nLiars = 1; state.liars = 1;
+    rebuildWorld();
+  }
+  const t = Math.max(1, state.tStar || 2);
+  switch(name){
+    case 'easy':         state.nLiars = Math.max(1, t - 1); break;
+    case 'tight':        state.nLiars = t; break;
+    case 'ambig':        state.nLiars = t + 1; break;
+    case 'over':         state.nLiars = t + 2; break;
+  }
+  state.liars = 1;
+  setToggle($('liarsBtn'), 1); $('liarsBtn').textContent = 'ON';
+  $('nLiars').value = state.nLiars;
+  $('nLiarsVal').textContent = state.nLiars;
+  rebuildWorld();
+  toast(`scenario: ${name} (${state.nLiars} lies, t*=${state.tStar})`);
+}
+
+// keyboard
+window.addEventListener('keydown', e => {
+  if(e.code === 'Space'){ e.preventDefault(); state.seed = (Math.random()*1e9)|0; rebuildWorld(); }
+  if(['0','1','2','4'].includes(e.key)){
+    const ph = +e.key;
+    state.phase = ph;
+    state.scrub = (ph == 0) ? 0 : (ph == 1) ? 0.5 : 1.0;
+    $('phaseSlider').value = state.scrub;
+    document.querySelectorAll('#phaseBtns button').forEach(b => {
+      b.classList.toggle('on', +b.dataset.phase === ph);
+    });
+    uploadLattice(); uploadEdges(); updateHUD();
+  }
+  if(e.key === 'l' || e.key === 'L') $('liarsBtn').click();
+  if(e.key === 'e' || e.key === 'E') $('edgesBtn').click();
+  if(e.key === 'h' || e.key === 'H') $('haloBtn').click();
+  if(e.key === 'd' || e.key === 'D') $('decodeBtn').click();
+  if(e.key === 't' || e.key === 'T') $('theoremBtn').click();
+});
+
+// =============================================================================
+//  Canvas sizing + click probing
+// =============================================================================
+function fit(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width  = Math.floor(innerWidth  * dpr);
+  canvas.height = Math.floor(innerHeight * dpr);
+  canvas.style.width = innerWidth+'px';
+  canvas.style.height = innerHeight+'px';
+  gl.viewport(0,0,canvas.width,canvas.height);
+  if(state.cs) uploadEdges();
+}
+window.addEventListener('resize', fit); fit();
+
+$('panel').addEventListener('mousedown', e => e.stopPropagation());
+
+canvas.addEventListener('mousedown', e => {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const fx = (e.clientX - rect.left) * dpr;
+  const fy = (rect.height - (e.clientY - rect.top)) * dpr;
+  state.mouse = [fx, fy];
+  state.mouseT = performance.now()/1000 - t0/1000;
+
+  const side = Math.min(canvas.width, canvas.height);
+  const ox = (canvas.width - side) * 0.5;
+  const oy = (canvas.height - side) * 0.5;
+  const cellPx = side / state.N;
+  const cx = Math.floor((fx - ox) / cellPx);
+  const cy = Math.floor((fy - oy) / cellPx);
+  if(cx<0||cy<0||cx>=state.N||cy>=state.N) return;
+  const idx = cy*state.N + cx;
+
+  if(state.probe === 'measure'){
+    state.overrides.set(idx, { forced:true, value: state.truth[idx] });
+    state.inspections++;
+    // If active interrogation is ON and this bit was distinguishing, prune
+    // candidate set.
+    if(state.interrog && state.candidateWorlds.length > 1){
+      const v = state.truth[idx];
+      const keep = state.candidateWorlds
+        .map((w, i) => ({ w, i }))
+        .filter(o => o.w[idx] === v);
+      if(keep.length >= 1 && keep.length < state.candidateWorlds.length){
+        state.candidateWorlds = keep.map(o => o.w);
+        state.candidates = keep.map(o => state.candidates[o.i]);
+        // Recompute detected liars from the single remaining candidate (if 1)
+        if(state.candidates.length === 1){
+          const witnessRowIdx = [];
+          for(let i=0;i<state.cs.rows.length;i++) if(state.cs.rows[i].kind === 2) witnessRowIdx.push(i);
+          state.detectedSet = new Set();
+          const e = state.candidates[0];
+          for(let i=0;i<e.length;i++) if(e[i]) state.detectedSet.add(witnessRowIdx[i]);
+          state.xHat = state.candidateWorlds[0];
+          state.bootstrap = bootstrapVerify(state.cs, state.xHat);
+          toast('candidate resolved after ' + state.inspections + ' inspection' + (state.inspections!==1?'s':''));
+        }
+        state.interrogPlan = suggestInterrogation(state.candidateWorlds);
+      }
+    }
+  } else if(state.probe === 'flip'){
+    const cur = state.overrides.get(idx) || pickSolvedForPhase().out[idx];
+    const v = cur.forced ? (1 - cur.value) : (1 - state.truth[idx]);
+    state.overrides.set(idx, { forced:true, value: v });
+  }
+  uploadLattice();
+  uploadEdges();
+  updateHUD();
+});
+
+// =============================================================================
+//  Boot + render loop
+// =============================================================================
+const t0 = performance.now();
+function frame(){
+  const t = (performance.now()-t0)/1000;
+  renderFrame(t);
+  $('t').textContent = t.toFixed(2);
+  requestAnimationFrame(frame);
+}
+
+rebuildWorld();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
