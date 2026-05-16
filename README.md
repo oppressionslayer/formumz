@@ -34,6 +34,26 @@ See `docs/RULE30_INVERSION.md`.
 
 ---
 
+## Try it yourself — the Intelligence Arena
+
+The **Intelligence Arena** (`lars_intelligence_arena.html`) is a fully-interactive
+demonstration page: a live Rule 30 inverse running in your browser, a parity-detection
+hunt where you can try to spot the hidden XOR yourself, zone-discovery animation, and
+the full AGI capability matrix. Every demo is real code running in the browser, not
+screenshots.
+
+![Parity hunter showing the WSRF detector finding the hidden subset — plus the license-required capabilities callout](results/hiddenparity.jpeg)
+
+Live at **[formumz.netlify.app/lars_intelligence_arena.html](https://formumz.netlify.app/lars_intelligence_arena.html)**.
+
+> To gain a real edge over your competition — wouldn't you rather have the
+> **number-theory expert who invented this** and knows it like the back of his
+> hand? From *quants* to *intelligence agencies*, you want to deal with
+> **Lars Rocha directly** — not some guy three layers downstream trying to
+> figure it out.
+
+---
+
 ## Reproduce in 90 seconds
 
 Install the libraries (one time):
