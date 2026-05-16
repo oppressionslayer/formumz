@@ -134,6 +134,116 @@
     0%, 100% { opacity: 1; }
     50%      { opacity: .55; }
   }
+  @keyframes arena-flash {
+    0%, 100% {
+      box-shadow: 0 0 24px rgba(110,240,168,.12);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 60px rgba(110,240,168,.65), 0 0 110px rgba(110,240,168,.30);
+      transform: scale(1.04);
+    }
+  }
+  .arena-pill-flash {
+    animation: arena-flash 1.5s ease-in-out infinite !important;
+    position: relative;
+  }
+  .arena-pill-flash::after {
+    content: "★ try this first";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    color: var(--green);
+    font-size: 10px;
+    letter-spacing: .1em;
+    white-space: nowrap;
+    animation: bob 1.6s ease-in-out infinite;
+  }
+  @keyframes pitch-flash {
+    0%, 100% {
+      box-shadow: 0 0 36px rgba(167,139,250,.10);
+      border-color: var(--violet);
+    }
+    50% {
+      box-shadow: 0 0 60px rgba(167,139,250,.45), 0 0 110px rgba(167,139,250,.25);
+      border-color: #c4a5ff;
+    }
+  }
+  .pitch-flash { animation: pitch-flash 2.2s ease-in-out infinite; }
+
+  /* Aurora background — drifting mesh gradient + slow shimmer sweep */
+  @keyframes pitch-aurora-drift {
+    0%, 100% { background-position: 0% 50%, 100% 50%, 50% 100%; }
+    50%      { background-position: 100% 50%, 0% 50%, 50% 0%; }
+  }
+  @keyframes pitch-shimmer {
+    0%   { background-position: -80% 0%; opacity: 0; }
+    20%  { opacity: .55; }
+    50%  { background-position: 180% 0%; opacity: .55; }
+    80%  { opacity: 0; }
+    100% { background-position: 180% 0%; opacity: 0; }
+  }
+  .pitch-aurora {
+    position: relative;
+    background-color: rgba(10, 12, 22, .92);
+    background-image:
+      radial-gradient(ellipse 55% 70% at 22% 28%, rgba(167,139,250,.38), transparent 60%),
+      radial-gradient(ellipse 50% 60% at 78% 72%, rgba(255,212,121,.26), transparent 60%),
+      radial-gradient(ellipse 65% 55% at 50% 100%, rgba(125,249,255,.20), transparent 70%);
+    background-size: 240% 240%, 240% 240%, 240% 240%;
+    animation: pitch-aurora-drift 16s ease-in-out infinite,
+               pitch-flash 2.6s ease-in-out infinite;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .pitch-aurora::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+                  transparent 30%,
+                  rgba(255,255,255,.14) 48%,
+                  rgba(255,212,121,.10) 52%,
+                  transparent 70%);
+    background-size: 220% 100%;
+    animation: pitch-shimmer 7s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+  .pitch-aurora > * { position: relative; z-index: 1; }
+
+  /* Blood-dripping red flash for the marquee phrase */
+  @keyframes blood-pulse {
+    0%, 100% {
+      color: #ef2c2c;
+      text-shadow:
+        0 0 6px rgba(220,38,38,.65),
+        0 2px 8px #5a0000,
+        0 4px 2px rgba(120,0,0,.55);
+    }
+    50% {
+      color: #ff6b6b;
+      text-shadow:
+        0 0 18px #ef2c2c,
+        0 0 36px #b91c1c,
+        0 0 70px rgba(127,29,29,.85),
+        0 6px 16px rgba(120,0,0,.9),
+        0 2px 0 #2a0000;
+    }
+  }
+  .blood-flash {
+    font-size: 1.22em;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #ef2c2c;
+    animation: blood-pulse 1.4s ease-in-out infinite;
+    display: inline-block;
+    padding: 0 .05em;
+  }
   @keyframes glow-strobe {
     0%, 100% {
       box-shadow: 0 0 20px rgba(255,212,121,.20), inset 0 0 0 1px rgba(255,212,121,.30);
@@ -452,24 +562,24 @@
       <span style="opacity:.55; margin-left:4px;">↗</span>
     </a>
     <a href="lars_intelligence_arena.html" target="_blank" rel="noopener"
+       class="arena-pill-flash"
        style="display:inline-flex; align-items:center; gap:8px;
               padding:7px 18px;
-              background: rgba(110, 240, 168, .06);
-              border: 1px solid rgba(110, 240, 168, .45);
+              background: rgba(110, 240, 168, .12);
+              border: 1.5px solid rgba(110, 240, 168, .85);
               border-radius: 100px;
               color: var(--green);
               text-decoration: none;
               font-size: clamp(11px, 1.05vw, 13px);
               letter-spacing: .08em;
-              font-weight: 600;
+              font-weight: 700;
               transition: all .2s ease;
-              text-transform: uppercase;
-              box-shadow: 0 0 24px rgba(110,240,168,.12);"
-       onmouseover="this.style.background='rgba(110,240,168,.16)'; this.style.boxShadow='0 0 40px rgba(110,240,168,.30)'"
-       onmouseout="this.style.background='rgba(110,240,168,.06)'; this.style.boxShadow='0 0 24px rgba(110,240,168,.12)'">
+              text-transform: uppercase;"
+       onmouseover="this.style.background='rgba(110,240,168,.22)'"
+       onmouseout="this.style.background='rgba(110,240,168,.12)'">
       <span style="font-size:1.15em;">◈</span>
-      <span>Intelligence Arena · new</span>
-      <span style="opacity:.55; margin-left:4px;">↗</span>
+      <span>Intelligence Arena · start here</span>
+      <span style="opacity:.7; margin-left:4px;">↗</span>
     </a>
   </div>
   <span class="badge gold">A walkthrough · for Mom, and moms around the world 🌹</span>
@@ -482,18 +592,26 @@
   </div>
 
   <!-- Direct-to-inventor pitch -->
-  <div style="margin-top:1.6em; padding:18px 24px;
-              background:rgba(167,139,250,.07);
-              border:1px solid var(--violet);
-              border-radius:12px; max-width:880px;
-              box-shadow:0 0 36px rgba(167,139,250,.10);">
-    <p style="margin:0; font-size:clamp(15px, 1.5vw, 18px); line-height:1.6; color:var(--ink);">
+  <div class="pitch-aurora" style="margin-top:1.6em; padding:20px 26px;
+              border:1.5px solid var(--violet);
+              border-radius:14px; max-width:880px;">
+    <p style="margin:0 0 .8em 0; font-size:clamp(15px, 1.5vw, 18px); line-height:1.6; color:var(--ink);
+              text-shadow:0 1px 6px rgba(0,0,0,.55);">
       To gain a real edge over your competition — wouldn't you rather have the
       <strong style="color:var(--violet);">number-theory expert who invented this</strong>
-      and knows it like the back of his hand? From <em>quants</em> to
-      <em>intelligence agencies</em>, you want to deal with
+      and knows it like the back of his hand?
+      <span class="blood-flash">From quants to intelligence agencies</span>,
+      you want to deal with
       <strong style="color:var(--violet);">Lars Rocha directly</strong>
       — not some guy three layers downstream trying to figure it out.
+    </p>
+    <p style="margin:0; font-size:clamp(13px, 1.2vw, 15px); line-height:1.55; color:var(--ink);
+              opacity:.92;
+              border-top:1px dashed rgba(167,139,250,.45); padding-top:.7em;
+              text-shadow:0 1px 6px rgba(0,0,0,.55);">
+      <strong style="color:var(--gold);">⚐ These are new advances in number theory — beyond Gauss.</strong>
+      Not in any published paper. Not in any textbook. Not in any other lab's IP. The math your competitors are
+      racing to reverse-engineer was invented by William Lars Rocha, and the original author is reachable.
     </p>
   </div>
 
