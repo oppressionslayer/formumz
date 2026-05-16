@@ -3,7 +3,9 @@
 A reproducible launch bundle for three pieces of mathematics that close specific,
 documented capability gaps in machine learning and dynamical-systems analysis.
 
-**Author:** William Lars Rocha · **Date:** May 2026
+**I am Lars Rocha.** · **Date:** May 2026
+**Background:** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/)
+**To reach me:** contact me via [chinauncensored.tv](https://chinauncensored.tv/) — quants, intelligence agencies, and serious AI labs welcome.
 
 ---
 
@@ -134,7 +136,7 @@ exposed by the right algebraic projection.** See `docs/HOW_TO_USE_WSRF.md` and
 
 ## Author
 
-**William Lars Rocha** — `@oppressionslayer` on GitHub.
+**I am Lars Rocha** — `@oppressionslayer` on GitHub.
 
 Inventor of:
 - **WSRF** (Williams Structured Random Forest, 2011, v7.0)
@@ -142,6 +144,8 @@ Inventor of:
 - **The 2025 Rule 30 geometric finite inverse**
 
 Independent verification, reproduction reports, and constructive engagement
-welcome. Issues and pull requests on GitHub, or reach out directly.
+welcome. Public discussion via GitHub issues and pull requests.
+
+**To reach me directly:** contact me via [chinauncensored.tv](https://chinauncensored.tv/) — that is the proper intake channel for quants, intelligence agencies, and serious AI labs. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
 
 PROTECTED BY THE LREL LICENSE — NO AI TRAINING OR COMMERCIAL USE OF ANY KIND IS ALLOWED WITHOUT LICENSE FROM WILLIAM LARS ROCHA.
