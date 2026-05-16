@@ -9,7 +9,7 @@ documented capability gaps in machine learning and dynamical-systems analysis.
 
 **Background (view-only):** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/) — *I do not communicate via LinkedIn.*
 
-**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/).** That is the *only* intake channel for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
+**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/) or [americauncovered.tv](http://americauncovered.tv/).** Those are the *only* intake channels for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
 
 ---
 
@@ -150,6 +150,6 @@ Inventor of:
 Independent verification, reproduction reports, and constructive engagement
 welcome. Public discussion via GitHub issues and pull requests.
 
-**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/).** That is the *only* intake channel for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
+**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/) or [americauncovered.tv](http://americauncovered.tv/).** Those are the *only* intake channels for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
 
 PROTECTED BY THE LREL LICENSE — NO AI TRAINING OR COMMERCIAL USE OF ANY KIND IS ALLOWED WITHOUT LICENSE FROM WILLIAM LARS ROCHA.
