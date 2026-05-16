@@ -4,8 +4,10 @@ A reproducible launch bundle for three pieces of mathematics that close specific
 documented capability gaps in machine learning and dynamical-systems analysis.
 
 **I am Lars Rocha.** · **Date:** May 2026
-**Background:** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/)
-**To reach me:** contact me via [chinauncensored.tv](https://chinauncensored.tv/) — quants, intelligence agencies, and serious AI labs welcome.
+
+**Background (view-only):** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/) — *I do not communicate via LinkedIn.*
+
+**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/)** — quants, intelligence agencies, and serious AI labs welcome. No other channel reaches me.
 
 ---
 
@@ -146,6 +148,6 @@ Inventor of:
 Independent verification, reproduction reports, and constructive engagement
 welcome. Public discussion via GitHub issues and pull requests.
 
-**To reach me directly:** contact me via [chinauncensored.tv](https://chinauncensored.tv/) — that is the proper intake channel for quants, intelligence agencies, and serious AI labs. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
+**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/).** That is the *only* intake channel for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
 
 PROTECTED BY THE LREL LICENSE — NO AI TRAINING OR COMMERCIAL USE OF ANY KIND IS ALLOWED WITHOUT LICENSE FROM WILLIAM LARS ROCHA.
