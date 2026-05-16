@@ -111,7 +111,7 @@ See `INSTALL.md` for Python 3.13 / joblib stderr-noise caveats.
 | `results/results.csv` | Every individual benchmark run, raw. |
 | `lars_forensic_playground_v3.html` | Interactive WebGL syndrome-decoder playground. |
 | `lars_shadertoy_v2_playground.html` | Interactive GF(2) superposition-collapse playground. |
-| `playground/lars_collapse_shadertoy.glsl` | Visual shader source for shadertoy.com. |
+| `playground/chris_collapse_shadertoy.glsl` | Visual shader source for shadertoy.com (UAP shout-out to Chris 🛸). |
 
 ---
 
