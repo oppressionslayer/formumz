@@ -5,6 +5,8 @@ documented capability gaps in machine learning and dynamical-systems analysis.
 
 **I am Lars Rocha.** · **Date:** May 2026
 
+**Live site:** [formumz.netlify.app](https://formumz.netlify.app) — interactive walkthrough, live demos, and the Intelligence Arena.
+
 **Background (view-only):** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/) — *I do not communicate via LinkedIn.*
 
 **Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/).** That is the *only* intake channel for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
