@@ -1,9 +1,11 @@
 // ===========================================================================
-// LARS COLLAPSE — Quantum-Parallel Constraint Resolution, Visualized
+// CHRIS COLLAPSE — Quantum-Parallel Constraint Resolution, Visualized 🛸
 // ===========================================================================
 //
-// Distilled from the GF(2) two-phase elimination research in lars-logic /
-// schur-logic / wsrf / forensic-syndrome-decoder (William Rocha, /formac).
+// A UAP-shout-out shader, dedicated to Chris. The math underneath is the same
+// GF(2) two-phase elimination research from lars-logic / schur-logic / wsrf /
+// forensic-syndrome-decoder (William Rocha). The lattice does the talking;
+// the title does the winking.
 //
 // One picture, one idea:
 //   * Cells are bits (qubits) of a hidden state.
