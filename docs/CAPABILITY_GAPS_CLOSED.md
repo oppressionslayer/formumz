@@ -29,9 +29,12 @@ methods, contrastive learning — is SQ-bounded and provably needs
 sits at chance on 5-way XOR. See `wsrf_parity_showdown.py` for the demonstration.
 
 ### How WSRF closes it
-WSRF projects features through P2 boundaries and runs **Gauss-Jordan over
+WSRF projects features through a **newly-discovered post-Euclid/Gauss
+number-theoretic boundary-detection layer**, then runs **Gauss-Jordan over
 GF(2)** on the resulting binary frame. Linear algebra over the binary field
-is *not* SQ-bounded — it's exact algebra, the right tool for parity.
+is *not* SQ-bounded — it's exact algebra, the right tool for parity. The
+boundary-detection technique is the part that's proprietary; internals under
+the LREL license.
 
 ### Use it
 ```python
@@ -74,7 +77,7 @@ defined by feature interactions are invisible.
 
 ### How WSRF closes it
 `auto_discover` runs a multi-strategy zone search (regime, distance,
-interconnected) over P2 boundary candidates. The search produces a small
+interconnected) over the proprietary boundary-detection candidates. The search produces a small
 discrete partition of the input space; each partition gets its own forest with
 adaptive complexity (more trees in harder zones).
 

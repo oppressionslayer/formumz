@@ -133,6 +133,11 @@
   <div>candidates <span class="m" id="candidates">—</span> · inspections <span class="k" id="inspections">0</span></div>
   <div>bootstrap <span class="g" id="bootstrap">—/—</span>
     <span class="badge" id="bootBadge">—</span></div>
+  <div id="detBootCallout" style="display:none; margin-top:6px; padding:5px 8px;
+       background:rgba(245,158,11,.08); border-left:2px solid var(--amber);
+       border-radius:3px; font-size:10px; color:var(--amber);">
+    ⚠ Detection perfect · bootstrap disagrees — T<sub>A</sub> and T<sub>B</sub> measure different things
+  </div>
 </div>
 
 <div id="help">
@@ -261,6 +266,9 @@
   </div>
   <div class="row">
     <button id="decodeBtn" style="flex:1">⚡ syndrome-decode</button>
+  </div>
+  <div class="row">
+    <button id="oracleBtn" style="flex:1; background:rgba(255,212,121,.10); border-color:var(--amber); color:var(--amber);">▶ follow the oracle</button>
   </div>
   <div class="row">
     <button id="theoremBtn" style="flex:1">📐 theorem</button>
@@ -469,11 +477,24 @@ void main(){
     col += vec3(1.0, 0.7, 0.85) * band * 0.5;
   }
 
-  // Candidate-distinguishing bit (active interrogation hint)
+  // Candidate-distinguishing bit (active interrogation hint) — UPGRADED:
+  // tripled-ring pulse + bright core so the optimal probe is impossible to miss
   if(distinguish > 0.5 && inRange){
-    float ring = smoothstep(0.06, 0.0, abs(length(local) - 0.62));
-    vec3 amber = vec3(1.0, 0.84, 0.4);
-    col += amber * ring * (0.6 + 0.4*sin(iTime*4.0));
+    float r = length(local);
+    vec3 amber = vec3(1.0, 0.78, 0.32);
+    // three concentric rings at different radii, all pulsing
+    float pulse = 0.5 + 0.5*sin(iTime*4.5);
+    float r1 = smoothstep(0.07, 0.0, abs(r - 0.48));
+    float r2 = smoothstep(0.06, 0.0, abs(r - 0.66));
+    float r3 = smoothstep(0.05, 0.0, abs(r - 0.84));
+    col += amber * r1 * (0.7 + 0.6*pulse);
+    col += amber * r2 * (0.9 + 0.5*pulse);
+    col += amber * r3 * (0.6 + 0.5*pulse);
+    // bright inner glow
+    col += amber * smoothstep(0.45, 0.0, r) * (0.35 + 0.25*pulse);
+    // expanding outer wave — "click here" signal
+    float wave = fract(iTime*0.7);
+    col += amber * smoothstep(0.04, 0.0, abs(r - 0.35 - wave*0.7)) * (1.0 - wave) * 0.9;
   }
 
   // Min-dist halo: rings expanding from detected/known liars
@@ -1848,6 +1869,11 @@ function updateHUD(){
   } else {
     bb.textContent = '✗ failed'; bb.className = 'badge fail';
   }
+  // Surface the "perfect detection ≠ bootstrap verified" tension that the
+  // reviewer specifically noticed. Different things; show callout when they disagree.
+  const detPerfect = actual.size > 0 && detected.size === actual.size && inter === actual.size;
+  const bootFailed = bs.total > 0 && bs.match < bs.total;
+  document.getElementById('detBootCallout').style.display = (detPerfect && bootFailed) ? '' : 'none';
   const labels = {0:'0 · init', 1:'1 · intra-block', 2:'2 · cross-block', 3:'3 · BP', 4:'4 · syndrome decode'};
   $('phaseLbl').textContent = labels[state.phase] || ('? ' + state.phase);
   // theorem panel
@@ -1939,6 +1965,126 @@ $('nLiars').addEventListener('change', () => rebuildWorld());
 
 $('reseedBtn').addEventListener('click', () => { state.seed = (Math.random()*1e9)|0; rebuildWorld(); });
 $('decodeBtn').addEventListener('click', () => { runForensicPipeline(); uploadLattice(); uploadEdges(); updateHUD(); toast('syndrome decode complete'); });
+
+// =============================================================================
+//  Follow the Oracle — auto-probe the system's own optimal recommendations
+// =============================================================================
+let oracleRunning = false;
+function probeCell(idx, animateClickAt){
+  // Same logic as the user click handler in measure mode, factored out so the
+  // oracle can call it programmatically.
+  state.overrides.set(idx, { forced:true, value: state.truth[idx] });
+  state.inspections++;
+  if(animateClickAt){
+    state.mouse = animateClickAt;
+    state.mouseT = performance.now()/1000 - t0/1000;
+  }
+  if(state.interrog && state.candidateWorlds.length > 1){
+    const v = state.truth[idx];
+    const keep = state.candidateWorlds
+      .map((w, i) => ({ w, i }))
+      .filter(o => o.w[idx] === v);
+    if(keep.length >= 1 && keep.length < state.candidateWorlds.length){
+      state.candidateWorlds = keep.map(o => o.w);
+      state.candidates = keep.map(o => state.candidates[o.i]);
+      if(state.candidates.length === 1){
+        const witnessRowIdx = [];
+        for(let i=0;i<state.cs.rows.length;i++) if(state.cs.rows[i].kind === 2) witnessRowIdx.push(i);
+        state.detectedSet = new Set();
+        const e = state.candidates[0];
+        for(let i=0;i<e.length;i++) if(e[i]) state.detectedSet.add(witnessRowIdx[i]);
+        state.xHat = state.candidateWorlds[0];
+        state.bootstrap = bootstrapVerify(state.cs, state.xHat);
+      }
+      state.interrogPlan = suggestInterrogation(state.candidateWorlds);
+    }
+  }
+  uploadLattice(); uploadEdges(); updateHUD();
+}
+function cellCenterClientCoords(idx){
+  const rect = canvas.getBoundingClientRect();
+  const side = Math.min(canvas.width, canvas.height);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cellPxCanvas = side / state.N;
+  const ox = (canvas.width  - side) * 0.5;
+  const oy = (canvas.height - side) * 0.5;
+  const cx = idx % state.N;
+  const cy = Math.floor(idx / state.N);
+  const xCanvas = ox + (cx + 0.5) * cellPxCanvas;
+  const yCanvasBottomUp = oy + (cy + 0.5) * cellPxCanvas;
+  return [xCanvas, yCanvasBottomUp];   // already in gl_FragCoord-style space
+}
+async function followTheOracle(){
+  if(oracleRunning) return;
+  if(!state.interrog){ toast('enable active interrogation first'); return; }
+  if(!state.interrogPlan || state.interrogPlan.length === 0){
+    runForensicPipeline();
+    uploadLattice(); uploadEdges(); updateHUD();
+  }
+  if(!state.interrogPlan || state.interrogPlan.length === 0){
+    toast('no candidates to disambiguate'); return;
+  }
+  oracleRunning = true;
+  const btn = $('oracleBtn');
+  btn.textContent = '… auto-probing …'; btn.disabled = true;
+  const MAX_STEPS = 12;
+  let step = 0;
+  while(state.candidateWorlds.length > 1 && step < MAX_STEPS){
+    const plan = state.interrogPlan;
+    if(!plan || plan.length === 0) break;
+    const idx = plan[0];
+    toast('probe ' + (step+1) + ' · cell ' + idx + ' (' + state.candidateWorlds.length + ' candidates)');
+    probeCell(idx, cellCenterClientCoords(idx));
+    await new Promise(r => setTimeout(r, 1100));
+    step++;
+  }
+  oracleRunning = false;
+  btn.textContent = '▶ follow the oracle'; btn.disabled = false;
+  if(state.candidateWorlds.length === 1){
+    toast('oracle resolved in ' + step + ' probe' + (step!==1?'s':''));
+  } else {
+    toast('oracle stopped at ' + step + ' probes');
+  }
+}
+$('oracleBtn').addEventListener('click', followTheOracle);
+
+// Hover tooltip for distinguishing cells — show "click to disambiguate"
+const hoverTip = document.createElement('div');
+hoverTip.style.cssText = 'position:fixed;pointer-events:none;display:none;'
+  + 'background:rgba(8,10,16,.94);border:1px solid var(--amber);color:var(--amber);'
+  + 'padding:4px 10px;border-radius:4px;font-size:11px;font-family:ui-monospace,Menlo,Consolas,monospace;'
+  + 'letter-spacing:.06em;text-transform:uppercase;z-index:200;'
+  + 'box-shadow:0 4px 12px #000a;';
+document.body.appendChild(hoverTip);
+canvas.addEventListener('mousemove', e => {
+  if(!state.interrog || !state.interrogPlan || state.interrogPlan.length === 0){
+    hoverTip.style.display = 'none'; return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const fx = (e.clientX - rect.left) * dpr;
+  const fy = (rect.height - (e.clientY - rect.top)) * dpr;
+  const side = Math.min(canvas.width, canvas.height);
+  const ox = (canvas.width  - side) * 0.5;
+  const oy = (canvas.height - side) * 0.5;
+  const cellPx = side / state.N;
+  const cx = Math.floor((fx - ox) / cellPx);
+  const cy = Math.floor((fy - oy) / cellPx);
+  if(cx<0||cy<0||cx>=state.N||cy>=state.N){ hoverTip.style.display='none'; return; }
+  const idx = cy*state.N + cx;
+  if(state.interrogPlan.includes(idx)){
+    const rank = state.interrogPlan.indexOf(idx) + 1;
+    hoverTip.textContent = rank === 1 ? '★ optimal probe — click to disambiguate' : '#' + rank + ' suggested probe';
+    hoverTip.style.left = (e.clientX + 14) + 'px';
+    hoverTip.style.top  = (e.clientY + 14) + 'px';
+    hoverTip.style.display = '';
+    canvas.style.cursor = 'pointer';
+  } else {
+    hoverTip.style.display = 'none';
+    canvas.style.cursor = 'crosshair';
+  }
+});
+canvas.addEventListener('mouseleave', () => { hoverTip.style.display='none'; });
 
 $('theoremBtn').addEventListener('click', () => {
   const tp = $('theorem');

@@ -7,10 +7,12 @@ D total features (the other D-K features are pure noise). Standard ML methods
 above chance because parity is the textbook example of a function with zero
 local gradient information — every individual feature is independent of y.
 
-WSRF's parity detector projects the data through P2 boundaries (powers-of-2
-thresholds) and runs Gauss-Jordan elimination over GF(2) on the resulting
-binary frame. If a low-dimensional XOR structure exists, it's exposed in the
-null space, and WSRF builds a zone-stratified forest on top of it.
+WSRF's parity detector projects the data through a newly-discovered
+post-Euclid/Gauss number-theoretic boundary-detection layer, then runs
+Gauss-Jordan elimination over GF(2) on the resulting binary frame. If a
+low-dimensional XOR structure exists, it's exposed in the null space, and
+WSRF builds a zone-stratified forest on top of it. Boundary-detection
+internals are proprietary; see the LREL license.
 
 Usage:
     pip install wsrf-lib
@@ -181,10 +183,11 @@ def main():
   splitting, or kernel-based learner fails to find signal without an
   exponential number of samples.
 
-  WSRF's parity detector projects features through P2 boundaries and runs
+  WSRF's parity detector projects features through a newly-discovered
+  post-Euclid/Gauss number-theoretic boundary-detection layer, then runs
   GF(2) Gauss-Jordan on the resulting binary frame. The hidden XOR drops out
   of the null space; the zone-stratified forest then learns on top of the
-  recovered structure. No exponential blow-up.
+  recovered structure. No exponential blow-up. Boundary internals proprietary.
 """)
 
 

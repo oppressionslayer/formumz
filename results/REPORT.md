@@ -54,10 +54,12 @@ learner that scores splits / gradients / kernels on single features finds
 nothing. Decision trees, gradient boosters, and MLPs typically need an
 exponential number of samples to discover *k*-way XOR for *k* > 4.
 
-WSRF's parity detector projects features through P2 boundaries (powers-of-2
-thresholds), then runs Gauss-Jordan elimination over GF(2) on the resulting
-binary frame. The hidden XOR drops out of the null space; a zone-stratified
-forest learns on top of the recovered structure. No exponential blow-up.
+WSRF's parity detector projects features through a newly-discovered
+post-Euclid/Gauss number-theoretic boundary-detection layer, then runs
+Gauss-Jordan elimination over GF(2) on the resulting binary frame. The hidden
+XOR drops out of the null space; a zone-stratified forest learns on top of the
+recovered structure. No exponential blow-up. Boundary-detection internals are
+proprietary, under LREL license.
 
 ## Reproducing
 

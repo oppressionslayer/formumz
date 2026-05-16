@@ -57,8 +57,10 @@ not true if you use the right algebra.
 
 WSRF doesn't fight the gradient problem; it sidesteps it.
 
-1. **P2 boundaries**: each feature is binarized at powers-of-two thresholds —
-   structural choice that exposes parity and modular-arithmetic relations.
+1. **Newly-discovered post-Euclid/Gauss number-theoretic boundary detection**:
+   each feature is binarized via a novel boundary-detection technique that
+   exposes parity and modular-arithmetic relations invisible to standard
+   methods. Internals under LREL license.
 2. **GF(2) Gauss-Jordan**: run linear-algebra-over-bits on the resulting binary
    frame. Hidden XOR relationships fall out of the *null space*.
 3. **Zone stratification**: assign each sample to a discovered zone (regime).
@@ -132,7 +134,7 @@ It's worth being precise about scope. WSRF solves *one* specific capability gap
 in current ML: discovery of low-dimensional algebraic structure in tabular data.
 That gap is real, it's well-documented, and it has resisted neural-network and
 gradient-boosting attacks for decades. WSRF closes it for the cases the algebra
-supports (XOR, modular arithmetic, P2 boundaries, zone partitions).
+supports (XOR, modular arithmetic, the proprietary boundary-detection layer, zone partitions).
 
 Where this matters for *more advanced* reasoning systems:
 

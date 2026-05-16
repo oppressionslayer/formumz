@@ -51,6 +51,40 @@
   #title{position:fixed;left:14px;bottom:10px;font-size:12px;opacity:.85;
     text-shadow:0 0 6px #000c}
   #title em{color:var(--cyan);font-style:normal}
+
+  /* Phase subtitle under the HUD phase line */
+  #hud .phase-subtitle{opacity:.55;font-size:10px;font-style:italic;
+    margin-left:6px;line-height:1.4;color:var(--cyan)}
+
+  /* Floating "FORCED" toast when clicking a forced bit */
+  .click-toast{position:fixed;pointer-events:none;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:11px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--red);
+    text-shadow:0 0 8px #000c, 0 0 4px #000;
+    background:rgba(255,107,138,.18);
+    border:1px solid var(--red);border-radius:4px;
+    padding:4px 8px;
+    animation:toast-fade .9s ease-out forwards;z-index:1000}
+  .click-toast.measured{color:var(--cyan);background:rgba(125,249,255,.12);
+    border-color:var(--cyan)}
+  @keyframes toast-fade{
+    0%   {opacity:1; transform:translate(-50%,0) scale(1.0)}
+    50%  {opacity:1; transform:translate(-50%,-22px) scale(1.06)}
+    100% {opacity:0; transform:translate(-50%,-38px) scale(1.0)}
+  }
+
+  /* Pulse the syndrome counter when it changes */
+  @keyframes synd-flash{
+    0%, 100% {color:var(--red); text-shadow:none}
+    25%      {color:#fff; text-shadow:0 0 12px var(--red), 0 0 20px var(--red); transform:scale(1.4)}
+    75%      {color:var(--red); text-shadow:0 0 8px var(--red); transform:scale(1.1)}
+  }
+  #syn.flash{animation:synd-flash .7s ease-out;display:inline-block;transform-origin:left}
+
+  /* Density slider live preview tooltip */
+  #densityPreview{display:inline-block;margin-left:8px;
+    font-size:10px;color:var(--cyan);opacity:.7;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -59,6 +93,7 @@
 <div id="hud">
   <div><b>GF(2) SUPERPOSITION COLLAPSE · v2</b></div>
   <div>phase <span class="k" id="phase">—</span> · t=<span id="t">0.00</span>s</div>
+  <div class="phase-subtitle" id="phaseSubtitle">—</div>
   <div>vars <span class="m" id="vars">—</span> · constraints <span class="m" id="cons">—</span></div>
   <div>forced <span class="g" id="forced">—</span> · free <span class="m" id="free">—</span></div>
   <div>blocks <span class="m" id="blocks">—</span> · syndrome <span class="r" id="syn">0</span></div>
@@ -99,6 +134,9 @@
   <div class="row"><label>Density</label>
     <input type="range" id="density" min="0.15" max="0.55" step="0.01" value="0.32">
     <span class="val" id="densityVal">.32</span>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:-4px;">
+    <span id="densityPreview">~ — constraints</span>
   </div>
   <div class="row"><label>Grid</label>
     <div class="group" id="gridBtns">
@@ -296,12 +334,21 @@ void main(){
     float r = length(local);
     col += red * 0.35 * smoothstep(1.0, 0.0, abs(r - 0.5 - 0.3*sin(iTime*3.0))) * synGain;
 
-    // min-distance halo: expanding ring announcing decoding radius
+    // min-distance halo: a real glowing ring on every liar cell (formerly placeholder).
+    // Two layers — a bright inner core + a slow-expanding outer wave — so it pulses
+    // visibly without being seizure-inducing.
     if(iHalo > 0.5){
-      float ringR = 1.0 + 0.6*sin(iTime*1.5 + cell.x*0.3);
-      float d = length(uv - (cell + 0.5 - 0.5*iN)/(0.5*iN));
-      // cheap localized halo
-      col += vec3(1.0, 0.7, 0.85) * 0.0;  // placeholder
+      float r = length(local);
+      // Inner halo ring locked at r≈0.85 (just inside the cell edge)
+      float innerRing = smoothstep(0.04, 0.0, abs(r - 0.85));
+      // Outer breathing ring that expands and fades on a slow cycle
+      float wave = fract(iTime * 0.6 + h1(cell.x*0.7 + cell.y*1.3) * 0.5);
+      float waveRing = smoothstep(0.05, 0.0, abs(r - 0.4 - wave * 0.6)) * (1.0 - wave);
+      vec3 haloCol = vec3(1.0, 0.78, 0.92);
+      col += haloCol * innerRing * 1.2;
+      col += haloCol * waveRing * 0.9;
+      // brighten the cell core so it stands out against neighbors
+      col += haloCol * smoothstep(0.6, 0.0, r) * 0.18;
     }
   }
 
@@ -641,6 +688,7 @@ function rebuildAndSolve(){
   computeMinDistEstimate();
   uploadLattice();
   updateHUD();
+  refreshDensityPreview();
 }
 function reSolveOnly(){
   const res = state.cs.solve();
@@ -712,6 +760,52 @@ function updateHUD(){
   $('tstar').textContent = state.tStar ?? '—';
   const labels = {1:'1 · blocks', 2:'2 · superposition', 3:'3 · entanglement', 4:'4 · syndrome'};
   $('phase').textContent = labels[state.phase];
+  const subtitles = {
+    1:'per-block elimination · each diagonal is one independent block being solved',
+    2:'free variables shimmer · each represents multiple solutions superposed',
+    3:'cross-block constraint threads · variables now influence each other',
+    4:'syndrome decoding · red flashes mark constraint violations from liars'
+  };
+  $('phaseSubtitle').textContent = subtitles[state.phase] || '';
+
+  // Syndrome change detection — pulse the counter when it rises
+  const synEl = $('syn');
+  const cur = +synEl.textContent || 0;
+  if(state._lastSyn !== undefined && cur > state._lastSyn){
+    synEl.classList.remove('flash');
+    void synEl.offsetWidth;            // restart the animation
+    synEl.classList.add('flash');
+    setTimeout(()=>synEl.classList.remove('flash'), 800);
+  }
+  state._lastSyn = cur;
+}
+
+// Predict constraint count from grid + density (matches buildWorld formula)
+function predictConstraints(N, density){
+  const B = 4;
+  const blocksX = Math.ceil(N/B), blocksY = Math.ceil(N/B);
+  const cellsPerBlock = B*B;
+  const perBlock = Math.max(cellsPerBlock,
+    Math.round(cellsPerBlock*cellsPerBlock*density*0.25));
+  const intra = blocksX*blocksY*perBlock;
+  const cross = Math.max(2, Math.round(blocksX*blocksY*0.3));
+  return intra + cross;
+}
+function refreshDensityPreview(){
+  const el = document.getElementById('densityPreview');
+  if(!el) return;
+  el.textContent = '~ ' + predictConstraints(state.N, state.density) + ' constraints';
+}
+
+// Floating "FORCED — no effect" or "MEASURED" toast at click location
+function spawnClickToast(clientX, clientY, text, measured){
+  const el = document.createElement('div');
+  el.className = 'click-toast' + (measured ? ' measured' : '');
+  el.textContent = text;
+  el.style.left = clientX + 'px';
+  el.style.top  = (clientY - 16) + 'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 950);
 }
 
 // ============================================================================
@@ -753,6 +847,7 @@ $('animBtn').addEventListener('click', () => {
 $('density').addEventListener('input', e => {
   state.density = +e.target.value;
   $('densityVal').textContent = state.density.toFixed(2).replace(/^0/,'');
+  refreshDensityPreview();
 });
 $('density').addEventListener('change', () => rebuildAndSolve());
 $('reseedBtn').addEventListener('click', () => { state.seed = (Math.random()*1e9)|0; rebuildAndSolve(); });
@@ -805,9 +900,19 @@ canvas.addEventListener('mousedown', e => {
   if(cx<0||cy<0||cx>=state.N||cy>=state.N) return;
   const idx = cy*state.N + cx;
 
+  // Check if the bit was already forced — show feedback either way
+  const currentCell = state.overrides.get(idx) || state.solved.out[idx];
+  const wasForced = currentCell.forced;
+
   if(state.probe === 'measure'){
-    // collapse this bit to the truth value (oracle measurement)
-    state.overrides.set(idx, { forced:true, value: state.truth[idx] });
+    if(wasForced){
+      // No-op click on forced bit — show "FORCED" toast
+      spawnClickToast(e.clientX, e.clientY, 'FORCED — no effect', false);
+    } else {
+      // Successful collapse — show "MEASURED" toast in cyan
+      spawnClickToast(e.clientX, e.clientY, 'MEASURED', true);
+      state.overrides.set(idx, { forced:true, value: state.truth[idx] });
+    }
   } else if(state.probe === 'flip'){
     // invert: if forced, flip the value; if free, force it to NOT(truth)
     const cur = state.overrides.get(idx) || state.solved.out[idx];

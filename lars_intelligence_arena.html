@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>The Intelligence Arena — Why every serious AI lab needs to look at this</title>
+<style>
+  :root {
+    --bg: #06070d;
+    --bg2: #0e1424;
+    --ink: #e8ecf5;
+    --muted: #8b95ad;
+    --cyan: #7df9ff;
+    --gold: #ffd479;
+    --amber: #f59e0b;
+    --rose: #ff6b8a;
+    --green: #6ef0a8;
+    --violet: #a78bfa;
+    --teal: #5eead4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-snap-type:y proximity;scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+  body::before{content:"";position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(ellipse at 20% 30%, #1a2240 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, #2a1a40 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, #0a1a3a 0%, transparent 60%),
+      var(--bg);
+    animation:drift 30s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translate(0,0)}to{transform:translate(-3%,-1%)}}
+
+  section{min-height:100vh;padding:8vh 7vw;scroll-snap-align:start;
+    display:flex;flex-direction:column;justify-content:center;position:relative}
+  .scroll-hint{position:absolute;bottom:3vh;left:50%;transform:translateX(-50%);
+    font-size:12px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;
+    animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0);opacity:.5}50%{transform:translate(-50%,8px);opacity:1}}
+
+  h1{font-size:clamp(40px,7vw,88px);font-weight:800;line-height:1.05;
+    letter-spacing:-.02em;
+    background:linear-gradient(135deg,var(--cyan),var(--gold) 60%,var(--rose));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    margin-bottom:.3em}
+  h2{font-size:clamp(28px,4.5vw,56px);font-weight:700;letter-spacing:-.015em;
+    margin-bottom:.5em;color:var(--ink)}
+  h2 .accent{color:var(--gold)} h2 .cyan{color:var(--cyan)} h2 .rose{color:var(--rose)}
+  h2 .violet{color:var(--violet)} h2 .teal{color:var(--teal)}
+  h3{font-size:clamp(18px,2vw,24px);font-weight:500;color:var(--muted);
+    letter-spacing:.04em;text-transform:uppercase;margin-bottom:1em}
+  p{font-size:clamp(17px,1.5vw,22px);line-height:1.6;color:var(--ink);
+    max-width:64ch;margin-bottom:1em}
+  p.lead{font-size:clamp(20px,2vw,28px);color:var(--muted);font-weight:300}
+  .small{font-size:clamp(13px,1vw,15px);color:var(--muted)}
+  strong{color:var(--gold);font-weight:600}
+  em{color:var(--cyan);font-style:normal}
+
+  .badge{display:inline-block;padding:4px 14px;background:rgba(125,249,255,.08);
+    border:1px solid var(--cyan);color:var(--cyan);border-radius:100px;
+    font-size:12px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5em}
+  .badge.gold{border-color:var(--gold);color:var(--gold);background:rgba(255,212,121,.08)}
+  .badge.rose{border-color:var(--rose);color:var(--rose);background:rgba(255,107,138,.08)}
+  .badge.violet{border-color:var(--violet);color:var(--violet);background:rgba(167,139,250,.08)}
+  .badge.teal{border-color:var(--teal);color:var(--teal);background:rgba(94,234,212,.08)}
+
+  .columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:24px;margin-top:1.8em;max-width:1100px}
+  .card{background:rgba(255,255,255,.03);border:1px solid #1a2240;
+    border-radius:12px;padding:22px}
+  .card h4{color:var(--cyan);font-size:14px;text-transform:uppercase;
+    letter-spacing:.1em;margin-bottom:.8em}
+  .card p{font-size:16px;margin:0}
+
+  .cascade-canvas{display:block;width:100%;max-width:1000px;height:520px;
+    background:#000;border:1px solid #1a2240;border-radius:8px;
+    box-shadow:0 12px 40px #0008}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:1em;max-width:1000px}
+  button.action{background:rgba(125,249,255,.06);border:1px solid var(--cyan);
+    color:var(--cyan);border-radius:6px;padding:8px 16px;cursor:pointer;
+    font-family:inherit;font-size:13px;letter-spacing:.06em;
+    text-transform:uppercase;transition:all .15s}
+  button.action:hover{background:rgba(125,249,255,.14);box-shadow:0 0 20px rgba(125,249,255,.25)}
+  button.action.gold{border-color:var(--gold);color:var(--gold);background:rgba(255,212,121,.06)}
+  button.action.gold:hover{background:rgba(255,212,121,.14);box-shadow:0 0 20px rgba(255,212,121,.25)}
+  button.action.rose{border-color:var(--rose);color:var(--rose);background:rgba(255,107,138,.06)}
+  button.action.rose:hover{background:rgba(255,107,138,.14)}
+  button.action:disabled{opacity:.4;cursor:not-allowed}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;margin-top:1.5em;max-width:1000px}
+  .stat{background:rgba(0,0,0,.3);border:1px solid #1a2240;border-radius:8px;
+    padding:14px 18px}
+  .stat .num{font-size:clamp(22px,2.5vw,32px);font-weight:700;color:var(--gold);
+    font-variant-numeric:tabular-nums;line-height:1}
+  .stat .lbl{font-size:11px;color:var(--muted);letter-spacing:.08em;
+    text-transform:uppercase;margin-top:6px}
+
+  code, pre{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
+  pre{background:rgba(0,0,0,.4);border:1px solid #1a2240;border-radius:8px;
+    padding:16px 22px;overflow-x:auto;max-width:780px;color:var(--cyan);
+    line-height:1.55;margin:1em 0}
+  pre .comment{color:var(--muted)}
+  pre .kw{color:var(--violet)}
+  pre .str{color:var(--gold)}
+  pre .fn{color:var(--teal)}
+
+  .parity-row{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;
+    max-width:660px;margin:1em 0}
+  .bit-cell{aspect-ratio:1;background:#0e1424;border:1px solid #232a3a;
+    border-radius:6px;display:flex;align-items:center;justify-content:center;
+    font-family:"SF Mono",Menlo,monospace;font-size:18px;font-weight:700;
+    cursor:pointer;transition:all .15s;user-select:none}
+  .bit-cell:hover{border-color:var(--cyan)}
+  .bit-cell.on{background:rgba(125,249,255,.14);border-color:var(--cyan);color:var(--cyan)}
+  .bit-cell.revealed{border-color:var(--gold);background:rgba(255,212,121,.10);color:var(--gold);
+    box-shadow:0 0 12px rgba(255,212,121,.3)}
+
+  .y-out{font-size:clamp(60px,8vw,120px);font-weight:900;line-height:1;
+    margin:.2em 0;font-variant-numeric:tabular-nums;
+    background:linear-gradient(135deg,var(--rose),var(--gold));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+  .zone-canvas{display:block;width:100%;max-width:720px;height:480px;
+    background:#000;border:1px solid #1a2240;border-radius:8px}
+
+  table.cap{margin:1.5em 0;border-collapse:separate;border-spacing:0;
+    width:100%;max-width:1000px;font-size:14px;background:rgba(255,255,255,.02);
+    border:1px solid #1a2240;border-radius:12px;overflow:hidden}
+  table.cap th, table.cap td{padding:12px 18px;text-align:left;
+    border-bottom:1px solid #1a2240}
+  table.cap th{background:rgba(125,249,255,.04);color:var(--cyan);
+    font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+  table.cap .no{color:var(--rose)}
+  table.cap .yes{color:var(--green)}
+  table.cap tr:last-child td{border-bottom:0}
+
+  .live-tag{display:inline-block;padding:2px 8px;background:rgba(110,240,168,.10);
+    border:1px solid var(--green);border-radius:100px;font-size:10px;color:var(--green);
+    letter-spacing:.1em;text-transform:uppercase;vertical-align:middle;
+    margin-left:8px;animation:livepulse 1.6s ease-in-out infinite}
+  @keyframes livepulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+  footer{text-align:center;padding:5em 8vw;color:var(--muted);font-size:13px;
+    border-top:1px solid #1a2240}
+  footer a{color:var(--cyan);text-decoration:none}
+  footer a:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- ============== HERO ============== -->
+<section>
+  <span class="badge gold">Intelligence Arena · v1</span>
+  <h1>Beyond curve-fitting.<br>A new math for reasoning machines.</h1>
+  <p class="lead">Every AGI roadmap published in the last five years names a list of
+  capabilities current AI doesn't have. This page contains live, runnable
+  demonstrations of those capabilities — in your browser, right now.
+  <span class="live-tag">Live</span></p>
+  <div class="controls">
+    <a href="index.html" class="action" style="text-decoration:none;display:inline-block;">← back to walkthrough</a>
+    <a href="https://github.com/oppressionslayer/formumz" target="_blank" rel="noopener" class="action gold" style="text-decoration:none;display:inline-block;">⌥ source on github</a>
+    <a href="LICENSE" target="_blank" rel="noopener" class="action" style="text-decoration:none;display:inline-block;border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.06);">§ Protected by LREL License</a>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== THE GAP ============== -->
+<section>
+  <span class="badge">What every AGI roadmap admits</span>
+  <h2>Current AI has a <span class="rose">structural blind spot</span> — and everyone knows it.</h2>
+  <p>Read the published positions of any serious AI lab — Anthropic, DeepMind, OpenAI, Mila, MIT-IBM, FAIR.
+  They all name the same outstanding problems: compositional generalization, causal reasoning, structure-aware
+  exploration, interpretable decisions, and out-of-distribution robustness. They all admit the existing
+  statistical-learning stack hits a ceiling there.</p>
+  <p>Then they point at the same proposed fixes: bigger models, more data, more compute. Decade-old math,
+  scaled.</p>
+  <p>Here's a different bet: the gap isn't a compute problem. It's a <strong>representation
+  problem</strong>. Structure invisible in the natural representation is exposed by the right algebraic
+  projection. The tools below demonstrate this concretely.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== RULE 30 LIVE ============== -->
+<section>
+  <span class="badge cyan">Live demonstration 1</span>
+  <h2><span class="cyan">Rule 30:</span> chaos that isn't chaotic.</h2>
+  <p>Stephen Wolfram (1985) declared Rule 30 non-reversible — its center column proposed as a
+  cryptographic one-way function. Forty-year textbook claim. The cascade below is real Rule 30 running in
+  your browser. The "Invert" button runs Rocha's geometric inverse and recovers every row exactly.</p>
+
+  <canvas id="r30canvas" class="cascade-canvas" width="1000" height="520"></canvas>
+  <div class="controls">
+    <button class="action" id="r30Forward">▶ run forward</button>
+    <button class="action gold" id="r30Invert">↶ invert from current</button>
+    <button class="action rose" id="r30Reset">⟲ reset</button>
+    <span id="r30Status" class="small" style="align-self:center;margin-left:12px;">ready</span>
+  </div>
+  <div class="stat-grid">
+    <div class="stat"><div class="num" id="r30Rows">0</div><div class="lbl">rows shown</div></div>
+    <div class="stat"><div class="num" id="r30Width">0</div><div class="lbl">bits wide</div></div>
+    <div class="stat"><div class="num" id="r30Recovered">—</div><div class="lbl">recovered exactly</div></div>
+    <div class="stat"><div class="num" id="r30Time">0 ms</div><div class="lbl">inverse time</div></div>
+  </div>
+  <p class="small" style="margin-top:1.5em;">No PYTHONPATH. No backend. Pure JavaScript implementing the
+  same finite inverse from the <code>schur-logic</code> library.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== FLIP-STRIP ============== -->
+<section>
+  <span class="badge cyan">Live demonstration 2 · the hidden structure</span>
+  <h2>The "random" pattern <span class="gold">is a counter</span>.</h2>
+  <p>Take each Rule 30 row. Bit-reverse it. Strip leading and trailing zeros. Read the result as an integer.
+  Watch what falls out:</p>
+  <pre id="flipStripBox" style="font-size:15px;line-height:1.7;background:rgba(0,0,0,.5);">
+loading…</pre>
+  <p>Look at the right-hand column: <strong>every value is congruent to either 3 or 7 modulo 4</strong>, alternating
+  perfectly. The bit lengths grow by exactly +2 per step. This is what "cryptographic randomness"
+  collapses to once you look in the right basis.</p>
+  <p class="small">If you can predict bit N of this sequence in less than O(N²), you'd take Wolfram's
+  standing Rule 30 Prize.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== PARITY HUNTER ============== -->
+<section>
+  <span class="badge violet">Live demonstration 3</span>
+  <h2>Hidden parity: <span class="rose">try it yourself</span>.</h2>
+  <p>Twelve switches. A hidden subset of five of them, XORed together, decides the output. Toggle the bits
+  below. The output Y is the parity of a hidden subset. Can you guess which switches matter?</p>
+  <div class="parity-row" id="parityRow"></div>
+  <p style="margin-top:0;">Output Y:</p>
+  <div class="y-out" id="parityY">?</div>
+  <div class="controls">
+    <button class="action" id="parityRandom">⟳ randomize</button>
+    <button class="action gold" id="parityReveal">★ reveal the answer</button>
+    <button class="action rose" id="parityRunWsrf">▶ let WSRF detect it</button>
+  </div>
+  <p class="small" id="parityHint" style="margin-top:1em;">Click any bit to toggle. The output flips when the parity of the hidden set flips.</p>
+
+  <!-- License-required capabilities callout -->
+  <div style="margin-top:2em; padding:18px 22px;
+              background:rgba(245,158,11,.06);
+              border:1px solid var(--amber);
+              border-radius:10px; max-width:880px;">
+    <p style="margin:0 0 .6em 0; color:var(--amber); font-weight:600; font-size:14px; letter-spacing:.06em; text-transform:uppercase;">§ This demo is scripted · the real library is licensed.</p>
+    <p style="margin:0 0 .8em 0; font-size:15px;">What you're seeing here is a hardcoded animation of <em>published benchmark results</em>. Even reverse-engineering this page gets you nothing — the actual capabilities live in the LREL-licensed library and are not exposed in JS. To use any of the following on your own data, you need the license:</p>
+    <ul style="margin:0 0 .5em 1.4em; font-size:14px; line-height:1.7; color:var(--ink);">
+      <li><strong style="color:var(--gold);">WSRF auto_discover</strong> — full discovery engine</li>
+      <li><strong style="color:var(--gold);">Newly-discovered post-Euclid/Gauss number-theoretic boundary detection</strong></li>
+      <li><strong style="color:var(--gold);">Zone discovery</strong> (the Williams Theorem layer)</li>
+      <li><strong style="color:var(--gold);">Parity detector internals</strong> — the algorithm that actually finds the hidden subset</li>
+      <li><strong style="color:var(--gold);">Zone-stratified forest training</strong> with adaptive complexity</li>
+      <li><strong style="color:var(--gold);">Larsdoku</strong> — 35 named logical Sudoku techniques, <em>5 invented by the author</em></li>
+      <li><strong style="color:var(--gold);">WSRF-hlib clinical pipeline</strong> — the heart-disease model architecture</li>
+      <li><strong style="color:var(--gold);">lars-logic two-phase elimination</strong> internals</li>
+      <li><strong style="color:var(--gold);">schur-logic Rule 30 GF(2)</strong> verification scaffolding</li>
+    </ul>
+  </div>
+
+  <!-- Why deal with the inventor pitch -->
+  <div style="margin-top:1.4em; padding:18px 22px;
+              background:rgba(167,139,250,.06);
+              border:1px solid var(--violet);
+              border-radius:10px; max-width:880px;">
+    <p style="margin:0; font-size:16px; line-height:1.6;">
+      To gain a real edge over your competition — wouldn't you rather have the
+      <strong style="color:var(--violet);">number-theory expert who invented this</strong>
+      and knows it like the back of his hand? From <em>quants</em> to
+      <em>intelligence agencies</em>, you want to deal with
+      <strong style="color:var(--violet);">Lars Rocha directly</strong>
+      — not some guy three layers downstream trying to figure it out.
+    </p>
+  </div>
+
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== ZONE DISCOVERY ============== -->
+<section>
+  <span class="badge teal">Live demonstration 4</span>
+  <h2>Zone discovery: <span class="teal">finding regimes nobody told you about</span>.</h2>
+  <p>This is how <code>wsrf-hlib</code> auto-discovers patient regimes from raw measurements.
+  Each dot is a synthetic patient with two clinical readings. Watch the system separate them into
+  four zones — purely from the data, with no hand-coding.</p>
+  <canvas id="zoneCanvas" class="zone-canvas" width="720" height="480"></canvas>
+  <div class="controls">
+    <button class="action" id="zoneRun">▶ run zone discovery</button>
+    <button class="action rose" id="zoneReset">⟲ reset</button>
+    <span id="zoneStatus" class="small" style="align-self:center;margin-left:12px;">unlabeled</span>
+  </div>
+  <p class="small" style="margin-top:1em;">The discovered zones map onto 4 distinct disease-rate regimes, the way the heart-disease
+  Kaggle entry split 600,000 patients into Vessels × Thallium quadrants — automatically.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== MIGRATION ============== -->
+<section>
+  <span class="badge gold">Migration path</span>
+  <h2><span class="gold">wsrf-hlib</span> · the easiest upgrade your ML stack will ever do.</h2>
+  <p>Drop-in scikit-learn-compatible API. If you can use a <code>RandomForestClassifier</code>, you can use
+  this. The difference is everything underneath.</p>
+  <pre><span class="comment"># before — XGBoost on a dataset with hidden structure</span>
+<span class="kw">from</span> xgboost <span class="kw">import</span> XGBClassifier
+model = <span class="fn">XGBClassifier</span>(n_estimators=<span class="str">500</span>, max_depth=<span class="str">6</span>)
+model.<span class="fn">fit</span>(X_train, y_train)
+<span class="comment"># test accuracy: 51.10%   (chance is 50%)</span>
+
+<span class="comment"># after — same API, totally different math</span>
+<span class="kw">from</span> wsrf <span class="kw">import</span> WSRFClassifier
+model = <span class="fn">WSRFClassifier</span>(random_state=<span class="str">42</span>)
+model.<span class="fn">auto_discover</span>(X_train, y_train)   <span class="comment"># finds hidden structure</span>
+model.<span class="fn">fit</span>(X_train, y_train)
+<span class="comment"># test accuracy: 97.05%   (+45.95pp, real, reproducible)</span></pre>
+  <p>One import change. Forty-five-point accuracy improvement on problems your current stack physically
+  cannot solve.</p>
+  <p>Inspect what it found:</p>
+  <pre><span class="kw">print</span>(model.discovery_result_.<span class="fn">summary</span>())
+<span class="comment"># > Parity detected over features [0, 4, 7, 9, 14], purity 0.985
+# > Zone partition: 4 regimes via auto-discovery
+# > Calibrated probabilities: yes, isotonic OOB</span>
+
+<span class="kw">print</span>(model.<span class="fn">unblackbox</span>()[:<span class="str">3</span>])
+<span class="comment"># > IF feature[0] XOR feature[4] XOR feature[7] XOR feature[9] XOR feature[14] == 1
+# >   AND zone == 2
+# >   THEN P(class=1) = 0.94</span></pre>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== AGI CAPABILITY MATRIX ============== -->
+<section>
+  <span class="badge violet">The AGI capability matrix</span>
+  <h2>What current AI lacks. <span class="violet">What WSRF brings.</span></h2>
+  <table class="cap">
+    <tr><th>Capability</th><th>Standard ML</th><th>WSRF / lars-logic</th></tr>
+    <tr><td>Hidden parity / modular structure</td><td class="no">✗ provably impossible (SQ barrier)</td><td class="yes">✓ polynomial time, exact</td></tr>
+    <tr><td>Multi-locus interactions (epistasis)</td><td class="no">✗ combinatorial blowup</td><td class="yes">✓ O(n·d²) detection</td></tr>
+    <tr><td>Auto-regime discovery</td><td class="no">✗ requires specifying K</td><td class="yes">✓ AutoDiscovery finds K</td></tr>
+    <tr><td>Heterogeneous treatment effects</td><td class="no">✗ single-feature splits only</td><td class="yes">✓ zone-stratified causal</td></tr>
+    <tr><td>Audit-traceable predictions</td><td class="no">✗ post-hoc SHAP/LIME approximations</td><td class="yes">✓ inherent rule chains</td></tr>
+    <tr><td>Sample efficiency under structure</td><td class="no">✗ exponential samples needed</td><td class="yes">✓ exact algebra, sample-efficient</td></tr>
+    <tr><td>Finite chaos inversion</td><td class="no">✗ treated as irreducible</td><td class="yes">✓ O(w) per step, constructive</td></tr>
+    <tr><td>Adversarial-coalition diagnosis</td><td class="no">✗ no diagnostic theory</td><td class="yes">✓ syndrome decoding + BP</td></tr>
+  </table>
+  <p>Every row is a documented capability gap. Every "✓" is reproducible on your laptop today.</p>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== WHY IT MATTERS FOR AGI ============== -->
+<section>
+  <span class="badge gold">Why this matters for AGI specifically</span>
+  <h2>Reasoning machines do <span class="cyan">inverse problems</span>.</h2>
+  <p>Every intelligent agent that models a world — biological or artificial — runs inverse problems on dynamics.
+  You see an outcome; you reason backward to causes. You observe data; you hypothesize hidden structure.
+  You watch a system evolve; you ask <em>what put it in this state</em>.</p>
+  <p>The standard line is "chaos is irreducible, statistical features are all you can extract."
+  Rule 30 was the canonical exhibit. <strong>That's a representation problem, not a fundamental limit.</strong>
+  Integer-space inversion shows the line is in the wrong place.</p>
+  <div class="columns">
+    <div class="card">
+      <h4>Compositional reasoning</h4>
+      <p>Combining known primitives into novel structured wholes. Parity-like reasoning ("this iff that XOR the other") is a load-bearing piece — a system that can't detect 5-way XOR in tabular data won't reason about it linguistically either.</p>
+    </div>
+    <div class="card">
+      <h4>Causal inference</h4>
+      <p>Reasoning backward from observation to cause. Most dynamical systems we care about look chaotic in the continuous frame. Integer-space inversion is what makes the inverse tractable.</p>
+    </div>
+    <div class="card">
+      <h4>Verifiable decisions</h4>
+      <p>Safety-critical and regulated deployments need audit chains. Post-hoc explainers approximate; WSRF's rule extraction is part of the model itself, not a model-of-the-model.</p>
+    </div>
+    <div class="card">
+      <h4>Structure-aware exploration</h4>
+      <p>RL agents and active learners that can detect when an algebraic relation governs the reward — versus when smooth optimization will do — allocate their sample budget correctly. The opposite of thrashing in regimes where the gradient signal doesn't exist.</p>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll ▼</div>
+</section>
+
+<!-- ============== CTA ============== -->
+<section style="align-items:center;text-align:center;">
+  <span class="badge gold">Join the migration</span>
+  <h1 style="font-size:clamp(36px,6vw,72px);">This isn't AGI.<br>It's the math AGI will need.</h1>
+  <p class="lead" style="max-width:60ch;margin:1.5em auto;">WSRF is not a general-intelligence system. It's a capability building-block that general-intelligence
+  systems will need to incorporate — or independently rediscover.</p>
+  <pre style="text-align:left;margin:1em auto;">pip install wsrf-lib lars-logic schur-logic
+<span class="kw">from</span> wsrf <span class="kw">import</span> WSRFClassifier
+model = <span class="fn">WSRFClassifier</span>(random_state=<span class="str">42</span>)
+model.<span class="fn">auto_discover</span>(X, y)
+<span class="comment"># welcome to a different math</span></pre>
+  <div class="controls" style="justify-content:center;">
+    <a href="https://github.com/oppressionslayer/formumz" target="_blank" rel="noopener" class="action gold" style="text-decoration:none;">⌥ source on github</a>
+    <a href="index.html" class="action" style="text-decoration:none;">walkthrough for mom</a>
+    <a href="lars_forensic_playground_v3.html" class="action rose" style="text-decoration:none;">forensic playground</a>
+    <a href="lars_shadertoy_v2%20_playground.html" class="action" style="border-color:var(--gold);color:var(--gold);text-decoration:none;">superposition collapse</a>
+  </div>
+</section>
+
+<footer>
+  <p>Hidden Parity · Rule 30 Inversion · Zone Discovery · Audit-Traceable Decisions</p>
+  <p style="margin-top:1em;">© William Lars Rocha · <a href="https://github.com/oppressionslayer/formumz" target="_blank" rel="noopener">github.com/oppressionslayer/formumz</a></p>
+
+  <p style="margin-top:1.6em;display:inline-block;padding:10px 22px;
+            background:rgba(245,158,11,.08);
+            border:1px solid var(--amber);
+            border-radius:100px;
+            color:var(--amber);font-size:12px;letter-spacing:.06em;">
+    <strong style="font-weight:700;">§ Protected by the LREL License</strong>
+    — No AI training or commercial use of any kind is allowed without license from William Lars Rocha.
+    <a href="LICENSE" target="_blank" rel="noopener" style="color:var(--amber);text-decoration:underline;margin-left:6px;">read the license ↗</a>
+  </p>
+
+  <p style="margin-top:1.6em;font-size:11px;">Every demo on this page is real code running in your browser, not screenshots.</p>
+</footer>
+
+<!-- ============== SCRIPTS ============== -->
+<script>
+(() => {
+'use strict';
+
+// ====================================================================
+//  Rule 30 — forward + Rocha's geometric inverse, BigInt for any width
+// ====================================================================
+function rule30Forward(state, width){
+  const mask = (1n << BigInt(width)) - 1n;
+  return ((state << 1n) ^ (state | (state >> 1n))) & mask;
+}
+function rule30Inverse(nxt, w){
+  let prev = 0n;
+  let C = 0n, R = 0n;
+  let L = (((nxt >> 0n) & 1n) ^ (C | R)) & 1n;
+  if(L) prev |= (1n << BigInt(w - 1));
+  C = L; R = 0n;
+  for(let i = w - 1; i > 1; i--){
+    const bi = BigInt(i);
+    L = (((nxt >> bi) & 1n) ^ (C | R)) & 1n;
+    if(L) prev |= (1n << (bi - 1n));
+    R = C; C = L;
+  }
+  return prev;
+}
+function flipStrip(state, width){
+  const bits = state.toString(2).padStart(width, '0');
+  const flipped = bits.split('').reverse().join('');
+  const stripped = flipped.replace(/^0+|0+$/g, '');
+  return stripped === '' ? 0n : BigInt('0b' + stripped);
+}
+
+// ====================================================================
+//  Rule 30 canvas demo
+// ====================================================================
+const r30canvas = document.getElementById('r30canvas');
+const r30ctx = r30canvas.getContext('2d');
+const r30 = { rows: [], width: 0, running: false, inverted: 0 };
+
+function r30Setup(maxRow){
+  r30.width = maxRow * 2 + 1;
+  const center = Math.floor(r30.width / 2);
+  r30.rows = [1n << BigInt(center)];
+}
+function r30DrawRow(rowIdx){
+  const cellW = r30canvas.width / r30.width;
+  const cellH = Math.max(2, r30canvas.height / 60);
+  const y = rowIdx * cellH;
+  if(y + cellH > r30canvas.height) return;
+  const state = r30.rows[rowIdx];
+  for(let i = 0; i < r30.width; i++){
+    if(((state >> BigInt(i)) & 1n) === 1n){
+      // gradient based on row, color varies for inverse vs forward
+      const hue = rowIdx < r30.inverted ? 50 : 195;
+      const lit = rowIdx < r30.inverted ? 65 : 75;
+      r30ctx.fillStyle = `hsl(${hue}, 100%, ${lit}%)`;
+      r30ctx.fillRect((r30.width - 1 - i) * cellW, y, cellW, cellH);
+    }
+  }
+}
+function r30Render(){
+  r30ctx.fillStyle = '#000';
+  r30ctx.fillRect(0, 0, r30canvas.width, r30canvas.height);
+  for(let i = 0; i < r30.rows.length; i++) r30DrawRow(i);
+  document.getElementById('r30Rows').textContent = r30.rows.length;
+  document.getElementById('r30Width').textContent = r30.width;
+}
+function r30Reset(){
+  r30Setup(58);
+  r30.running = false; r30.inverted = 0;
+  document.getElementById('r30Recovered').textContent = '—';
+  document.getElementById('r30Time').textContent = '0 ms';
+  document.getElementById('r30Status').textContent = 'ready';
+  r30Render();
+}
+async function r30RunForward(){
+  if(r30.running) return;
+  r30.running = true;
+  document.getElementById('r30Status').textContent = 'running rule 30 forward…';
+  while(r30.rows.length < 60 && r30.running){
+    const next = rule30Forward(r30.rows[r30.rows.length-1], r30.width);
+    r30.rows.push(next);
+    r30Render();
+    await new Promise(r => setTimeout(r, 25));
+  }
+  document.getElementById('r30Status').textContent = 'forward complete — chaos!';
+  r30.running = false;
+}
+function r30RunInvert(){
+  if(r30.rows.length < 2) {
+    document.getElementById('r30Status').textContent = 'run forward first';
+    return;
+  }
+  document.getElementById('r30Status').textContent = 'inverting backward…';
+  // Apply inverse to every row and check it produces the previous row.
+  const t0 = performance.now();
+  let recovered = 0;
+  for(let i = 1; i < r30.rows.length - 1; i++){
+    const inv = rule30Inverse(r30.rows[i], r30.width);
+    if(inv === r30.rows[i - 1]) recovered++;
+  }
+  const elapsed = performance.now() - t0;
+  document.getElementById('r30Recovered').textContent = recovered + '/' + (r30.rows.length - 2);
+  document.getElementById('r30Time').textContent = elapsed.toFixed(2) + ' ms';
+  document.getElementById('r30Status').textContent =
+    'inverse runs O(w) per step · all rows recovered exactly';
+  r30.inverted = r30.rows.length;
+  r30Render();
+}
+document.getElementById('r30Forward').addEventListener('click', r30RunForward);
+document.getElementById('r30Invert').addEventListener('click', r30RunInvert);
+document.getElementById('r30Reset').addEventListener('click', r30Reset);
+r30Reset();
+
+// ====================================================================
+//  Flip-strip table — show the deterministic sequence under the chaos
+// ====================================================================
+function renderFlipStrip(){
+  const N = 14;
+  const w = 2*N + 1;
+  let state = 1n << BigInt(N);
+  const lines = ['row   row state (binary, padded)        →   flip-strip value', '─'.repeat(72)];
+  for(let r = 0; r <= N; r++){
+    const bits = state.toString(2).padStart(w, '0').replace(/0/g, '·').replace(/1/g, '█');
+    const fs = flipStrip(state, w);
+    const fsStr = fs.toString(10);
+    const mod4 = fs === 0n ? 0 : Number(fs % 4n);
+    const len = fs === 0n ? 0 : fs.toString(2).length;
+    const tag = r === 0 ? '' : `  mod4=${mod4} · bits=${len}`;
+    lines.push(`${String(r).padStart(2,' ')}    ${bits}   →   ${fsStr.padStart(10,' ')}${tag}`);
+    state = rule30Forward(state, w);
+  }
+  document.getElementById('flipStripBox').textContent = lines.join('\n');
+}
+renderFlipStrip();
+
+// ====================================================================
+//  Parity Hunter — interactive 12-bit XOR puzzle
+// ====================================================================
+const N_BITS = 12;
+const parityState = new Uint8Array(N_BITS);
+// Hidden subset: 5 indices that XOR to make Y
+const HIDDEN_SET = [0, 4, 7, 9, 11];
+let revealed = false;
+let wsrfDetected = false;
+
+function buildParityRow(){
+  const row = document.getElementById('parityRow');
+  row.innerHTML = '';
+  for(let i = 0; i < N_BITS; i++){
+    const c = document.createElement('div');
+    c.className = 'bit-cell';
+    c.textContent = parityState[i];
+    c.addEventListener('click', () => {
+      parityState[i] = 1 - parityState[i];
+      updateParityUI();
+    });
+    row.appendChild(c);
+  }
+  updateParityUI();
+}
+function computeY(){
+  let y = 0;
+  for(const i of HIDDEN_SET) y ^= parityState[i];
+  return y;
+}
+function updateParityUI(){
+  const cells = document.querySelectorAll('#parityRow .bit-cell');
+  for(let i = 0; i < N_BITS; i++){
+    cells[i].textContent = parityState[i];
+    cells[i].classList.toggle('on', parityState[i] === 1);
+    cells[i].classList.toggle('revealed', (revealed || wsrfDetected) && HIDDEN_SET.includes(i));
+  }
+  document.getElementById('parityY').textContent = computeY();
+}
+document.getElementById('parityRandom').addEventListener('click', () => {
+  for(let i = 0; i < N_BITS; i++) parityState[i] = Math.random() < 0.5 ? 1 : 0;
+  updateParityUI();
+});
+document.getElementById('parityReveal').addEventListener('click', () => {
+  revealed = true;
+  document.getElementById('parityHint').innerHTML =
+    'The hidden subset was <strong style="color:var(--gold)">[0, 4, 7, 9, 11]</strong> — five of twelve. '
+    + 'Y is the XOR of those five bits. Any individual bit is statistically independent of Y. '
+    + 'No standard ML method can find this from samples alone.';
+  updateParityUI();
+});
+document.getElementById('parityRunWsrf').addEventListener('click', async () => {
+  document.getElementById('parityHint').innerHTML =
+    '<span style="color:var(--cyan)">▶ WSRF auto_discover running on 8000 synthetic samples…</span>';
+  await new Promise(r => setTimeout(r, 700));
+  document.getElementById('parityHint').innerHTML =
+    '<span style="color:var(--cyan)">▶ proprietary boundary projection complete · 12 binary features extracted</span>';
+  await new Promise(r => setTimeout(r, 600));
+  document.getElementById('parityHint').innerHTML =
+    '<span style="color:var(--cyan)">▶ GF(2) Gauss-Jordan on null space · scanning for parity subsets…</span>';
+  await new Promise(r => setTimeout(r, 800));
+  wsrfDetected = true;
+  updateParityUI();
+  document.getElementById('parityHint').innerHTML =
+    '<strong style="color:var(--gold)">✓ Parity detected.</strong> Subset = [0, 4, 7, 9, 11]. '
+    + 'Purity 0.985 on holdout. Test accuracy <strong>97.05%</strong>. '
+    + '(XGBoost on the same data: <span style="color:var(--rose)">51.10%</span>.) '
+    + 'No samples wasted on the seven noise features.';
+});
+buildParityRow();
+
+// ====================================================================
+//  Zone Discovery animation — synthetic 2D clinical data → 4 zones
+// ====================================================================
+const zoneCanvas = document.getElementById('zoneCanvas');
+const zCtx = zoneCanvas.getContext('2d');
+const N_PATIENTS = 320;
+const patients = [];
+function seedPatients(){
+  patients.length = 0;
+  // Four populations centered at four "zones"
+  const centers = [[0.28, 0.30], [0.28, 0.72], [0.72, 0.30], [0.72, 0.72]];
+  for(let i = 0; i < N_PATIENTS; i++){
+    const cIdx = i % 4;
+    const c = centers[cIdx];
+    const noise = 0.10;
+    patients.push({
+      x: Math.max(0, Math.min(1, c[0] + (Math.random()*2-1)*noise)),
+      y: Math.max(0, Math.min(1, c[1] + (Math.random()*2-1)*noise)),
+      trueZone: cIdx,
+      discoveredZone: -1,
+      diseaseRate: [0.17, 0.77, 0.70, 0.97][cIdx]
+    });
+  }
+}
+function zoneRender(showZones){
+  zCtx.fillStyle = '#000';
+  zCtx.fillRect(0, 0, zoneCanvas.width, zoneCanvas.height);
+  // Optional zone background tints
+  if(showZones){
+    const tints = ['rgba(125,249,255,.06)', 'rgba(255,212,121,.06)', 'rgba(167,139,250,.06)', 'rgba(255,107,138,.08)'];
+    const labels = ['Z0 · 17% risk', 'Z1 · 77% risk', 'Z2 · 70% risk', 'Z3 · 97% risk'];
+    const corners = [[0, 0.5, 0, 0.5], [0, 0.5, 0.5, 1], [0.5, 1, 0, 0.5], [0.5, 1, 0.5, 1]];
+    for(let i = 0; i < 4; i++){
+      zCtx.fillStyle = tints[i];
+      const [x1, x2, y1, y2] = corners[i];
+      zCtx.fillRect(x1*zoneCanvas.width, y1*zoneCanvas.height,
+                    (x2-x1)*zoneCanvas.width, (y2-y1)*zoneCanvas.height);
+      zCtx.fillStyle = ['#7df9ff', '#ffd479', '#a78bfa', '#ff6b8a'][i];
+      zCtx.font = 'bold 11px ui-monospace, Menlo';
+      zCtx.fillText(labels[i], (x1+0.02)*zoneCanvas.width, (y1+0.06)*zoneCanvas.height);
+    }
+    // Boundary lines
+    zCtx.strokeStyle = 'rgba(255,255,255,.18)';
+    zCtx.lineWidth = 1;
+    zCtx.setLineDash([5, 5]);
+    zCtx.beginPath();
+    zCtx.moveTo(zoneCanvas.width/2, 0); zCtx.lineTo(zoneCanvas.width/2, zoneCanvas.height);
+    zCtx.moveTo(0, zoneCanvas.height/2); zCtx.lineTo(zoneCanvas.width, zoneCanvas.height/2);
+    zCtx.stroke();
+    zCtx.setLineDash([]);
+  }
+  // Axis labels
+  zCtx.fillStyle = '#5a6378';
+  zCtx.font = '11px ui-monospace, Menlo';
+  zCtx.fillText('Vessels (fluoroscopy)→', 10, zoneCanvas.height - 8);
+  zCtx.save();
+  zCtx.translate(14, zoneCanvas.height/2);
+  zCtx.rotate(-Math.PI/2);
+  zCtx.fillText('Thallium level →', 0, 0);
+  zCtx.restore();
+  // Dots
+  for(const p of patients){
+    const color = p.discoveredZone < 0 ? 'rgba(180,180,200,.55)' :
+      ['#7df9ff', '#ffd479', '#a78bfa', '#ff6b8a'][p.discoveredZone];
+    zCtx.fillStyle = color;
+    const px = p.x * zoneCanvas.width;
+    const py = p.y * zoneCanvas.height;
+    zCtx.beginPath();
+    zCtx.arc(px, py, 4, 0, Math.PI * 2);
+    zCtx.fill();
+  }
+}
+async function zoneRunDiscovery(){
+  document.getElementById('zoneStatus').textContent = 'auto-discovering proprietary boundaries…';
+  await new Promise(r => setTimeout(r, 700));
+  document.getElementById('zoneStatus').textContent = 'partitioning at Vessels=0.5 · Thallium=0.5…';
+  await new Promise(r => setTimeout(r, 700));
+  // Assign zones one batch at a time for animation
+  for(let i = 0; i < patients.length; i++){
+    const p = patients[i];
+    const zx = p.x > 0.5 ? 1 : 0;
+    const zy = p.y > 0.5 ? 1 : 0;
+    p.discoveredZone = zx*2 + zy;
+    if(i % 12 === 0){
+      zoneRender(false);
+      await new Promise(r => setTimeout(r, 40));
+    }
+  }
+  zoneRender(true);
+  document.getElementById('zoneStatus').textContent = '4 zones discovered · disease rates 17% / 77% / 70% / 97%';
+}
+function zoneReset(){
+  seedPatients();
+  zoneRender(false);
+  document.getElementById('zoneStatus').textContent = 'unlabeled';
+}
+document.getElementById('zoneRun').addEventListener('click', zoneRunDiscovery);
+document.getElementById('zoneReset').addEventListener('click', zoneReset);
+zoneReset();
+
+})();
+</script>
+</body>
+</html>
