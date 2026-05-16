@@ -7,7 +7,7 @@ documented capability gaps in machine learning and dynamical-systems analysis.
 
 **Background (view-only):** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/) — *I do not communicate via LinkedIn.*
 
-**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/)** — quants, intelligence agencies, and serious AI labs welcome. No other channel reaches me.
+**Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/).** That is the *only* intake channel for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
 
 ---
 
