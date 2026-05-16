@@ -185,8 +185,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec3 cool      = vec3(0.10, 0.65, 1.00);   // bit = 0
     vec3 warm      = vec3(1.00, 0.62, 0.10);   // bit = 1
     vec3 collapsed = mix(cool, warm, bit);
-    vec3 superp    = shimmer(cellId, t);
-    vec3 cellCol   = mix(superp, collapsed, certainty);
+    vec3 superpo    = shimmer(cellId, t);
+    vec3 cellCol   = mix(superpo, collapsed, certainty);
 
     // Hex outline glow rises with certainty
     float edge   = hexEdge(gv);
