@@ -1,4 +1,4 @@
-# WSRF · Bone Marrow Cancer Research Plan
+# WSRF · Cancer Research Plan
 
 **Started:** 2026-05-22
 **Goal:** This is a project i'm going to be working on for cancer research and plan to provide results here soon, we want to see how the WSRF libraries can be applied to things like cancer research. To help us see the use here you can run join us and use the WSRF library family against public Kaggle datasets for bone marrow cancers (multiple myeloma, leukemias) and document any result — better, same, or worse than published baselines. Publishable findings get written up; null results get logged honestly so we don't repeat them. Initial cancer research shows very promising results with WSRF. This will help further our understanding of its mathematical framework and capabilities.
