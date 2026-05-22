@@ -298,6 +298,168 @@
     display: inline-block;
     padding: 0 .05em;
   }
+
+  /* Flashy attention-grabber for the "no one in the world" callout */
+  @keyframes wsrf-rainbow {
+    0%   { background-position:   0% 50%; filter: hue-rotate(0deg); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(45deg); }
+    100% { background-position:   0% 50%; filter: hue-rotate(0deg); }
+  }
+  @keyframes wsrf-pulse-box {
+    0%, 100% {
+      box-shadow:
+        0 0 18px rgba(232,121,249,.45),
+        0 0 36px rgba(110,240,168,.30),
+        inset 0 0 14px rgba(255,255,255,.06);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow:
+        0 0 36px rgba(232,121,249,.80),
+        0 0 80px rgba(110,240,168,.55),
+        0 0 120px rgba(255,212,121,.30),
+        inset 0 0 22px rgba(255,255,255,.14);
+      transform: scale(1.025);
+    }
+  }
+  @keyframes wsrf-shimmer-sweep {
+    0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+    18%  { opacity: .9; }
+    50%  { transform: translateX(140%)  skewX(-18deg); opacity: .9; }
+    65%  { opacity: 0; }
+    100% { transform: translateX(140%)  skewX(-18deg); opacity: 0; }
+  }
+  .wsrf-flashy {
+    position: relative;
+    display: block;
+    margin: .8em 0 .2em;
+    padding: 14px 22px;
+    font-size: clamp(17px, 1.9vw, 24px) !important;
+    font-weight: 900 !important;
+    line-height: 1.35;
+    text-align: center;
+    color: #fff !important;
+    text-shadow:
+      0 0 8px rgba(255,255,255,.55),
+      0 0 22px rgba(232,121,249,.65),
+      0 2px 4px rgba(0,0,0,.85);
+    background:
+      linear-gradient(120deg,
+        rgba(232,121,249,.22) 0%,
+        rgba(110,240,168,.20) 35%,
+        rgba(255,212,121,.22) 70%,
+        rgba(232,121,249,.22) 100%);
+    background-size: 280% 280%;
+    border: 2px solid rgba(232,121,249,.75);
+    border-radius: 14px;
+    animation:
+      wsrf-rainbow 3.2s ease-in-out infinite,
+      wsrf-pulse-box 1.8s ease-in-out infinite;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .wsrf-flashy::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 40%;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,255,255,.55) 50%,
+      transparent 100%);
+    animation: wsrf-shimmer-sweep 3.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wsrf-flashy > * { position: relative; z-index: 1; }
+  .wsrf-flashy .nonwhite {
+    display: inline-block;
+    color: #ffe066 !important;
+    font-style: normal;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    padding: 0 .15em;
+    text-shadow:
+      0 0 10px #f59e0b,
+      0 0 24px rgba(245,158,11,.85),
+      0 2px 4px rgba(0,0,0,.9);
+    animation: blood-pulse 1.6s ease-in-out infinite;
+  }
+  .wsrf-flashy .wsrf {
+    display: inline-block;
+    color: #6ef0a8 !important;
+    font-weight: 900;
+    letter-spacing: .06em;
+    padding: 0 .18em;
+    text-shadow:
+      0 0 12px #6ef0a8,
+      0 0 28px rgba(110,240,168,.85),
+      0 0 50px rgba(110,240,168,.45),
+      0 2px 4px rgba(0,0,0,.9);
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+
+  /* Focus-arrow callouts — bolder, brighter, with accent bar */
+  .focus-arrow {
+    display: block;
+    margin: .6em 0;
+    padding: .6em .9em .6em 1em;
+    font-size: clamp(13px, 1.25vw, 16.5px) !important;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    font-weight: 700 !important;
+    color: #f1f5fb !important;
+    line-height: 1.55;
+    border-left: 3px solid var(--violet);
+    background: linear-gradient(90deg, rgba(167,139,250,.10), transparent 75%);
+    border-radius: 4px;
+    text-shadow: 0 1px 4px rgba(0,0,0,.75);
+  }
+  .focus-arrow.green {
+    border-left-color: #6ef0a8;
+    background: linear-gradient(90deg, rgba(110,240,168,.12), transparent 75%);
+  }
+  .focus-arrow.rose {
+    border-left-color: var(--rose);
+    background: linear-gradient(90deg, rgba(255,107,138,.12), transparent 75%);
+  }
+  .focus-arrow.gold {
+    border-left-color: #ffd479;
+    background: linear-gradient(90deg, rgba(255,212,121,.12), transparent 75%);
+  }
+  .focus-arrow .arr {
+    display: inline-block;
+    margin-right: .45em;
+    color: var(--cyan);
+    font-weight: 900;
+    font-size: 1.2em;
+    text-shadow: 0 0 8px rgba(125,249,255,.55);
+  }
+  .focus-arrow .key {
+    color: #ffe066;
+    font-weight: 900;
+    letter-spacing: .05em;
+    text-shadow: 0 0 8px rgba(255,224,102,.55), 0 1px 4px rgba(0,0,0,.9);
+  }
+  .focus-arrow .key-green {
+    color: #6ef0a8;
+    font-weight: 900;
+    letter-spacing: .05em;
+    text-shadow: 0 0 10px rgba(110,240,168,.7), 0 1px 4px rgba(0,0,0,.9);
+  }
+  .focus-arrow .key-rose {
+    color: #ff8fa8;
+    font-weight: 900;
+    letter-spacing: .05em;
+    text-shadow: 0 0 10px rgba(255,107,138,.65), 0 1px 4px rgba(0,0,0,.9);
+  }
+  .focus-arrow .key-cyan {
+    color: var(--cyan);
+    font-weight: 900;
+    letter-spacing: .05em;
+    text-shadow: 0 0 10px rgba(125,249,255,.65), 0 1px 4px rgba(0,0,0,.9);
+  }
   @keyframes glow-strobe {
     0%, 100% {
       box-shadow: 0 0 20px rgba(255,212,121,.20), inset 0 0 0 1px rgba(255,212,121,.30);
@@ -776,36 +938,24 @@
                    text-shadow:0 1px 4px rgba(0,0,0,.55);">
         Epic Alien Technology like illusions on a plain white background — unlike traditional 3D images.
       </span>
-      <span style="display:block; margin-top:.55em;
-                   font-size:clamp(13px, 1.25vw, 16.5px);
-                   color:#fde68a; font-weight:600; line-height:1.5;
-                   text-shadow:0 0 10px rgba(253,230,138,.35), 0 1px 4px rgba(0,0,0,.7);">
-        Absolutely no one in the world can make illusions like this without using a
-        <em style="color:#e879f9; font-style:normal; font-weight:700;">NON&#8209;PLAIN&#8209;WHITE background</em>!
-        Unless they use <strong style="color:#6ef0a8; font-weight:800; letter-spacing:.02em;">WSRF</strong>!
+      <span class="wsrf-flashy">
+        <span>⚡ Absolutely <u>NO ONE</u> in the world can make illusions like the two JW logo images below without using a</span>
+        <span class="nonwhite">NON&#8209;PLAIN&#8209;WHITE background</span>!
+        <span style="display:block; margin-top:.3em;">Unless they use <span class="wsrf">WSRF</span>! ⚡</span>
       </span>
-      <span style="display:block; margin-top:.5em;
-                   font-size:clamp(10px, .95vw, 12px); letter-spacing:.18em;
-                   text-transform:uppercase; color:#94a3b8; font-weight:500;
-                   text-shadow:0 1px 3px rgba(0,0,0,.55);">
-        ↳ &nbsp;Created from the flat plain source material. Nobody can do this without <strong style="color:#6ef0a8; font-weight:800; letter-spacing:.02em;">WSRF</strong>.
+      <span class="focus-arrow green">
+        <span class="arr">↳</span>Created from the <span class="key">FLAT PLAIN SOURCE MATERIAL</span>. <span class="key-rose">NOBODY</span> can do this without <span class="key-green">WSRF</span>.
       </span>
-      <span style="display:block; margin-top:.3em;
-                   font-size:clamp(10px, .95vw, 12px); letter-spacing:.18em;
-                   text-transform:uppercase; color:#94a3b8; font-weight:500;
-                   text-shadow:0 1px 3px rgba(0,0,0,.55);">
-        ↳ &nbsp;Compare that with other images and feel your hair on your arms stand up as you realize our level of technology showcase.
+      <span class="focus-arrow rose">
+        <span class="arr">↳</span>Compare that with other images and <span class="key-rose">FEEL YOUR HAIR ON YOUR ARMS STAND UP</span> as you realize <span class="key">OUR LEVEL OF TECHNOLOGY SHOWCASE</span>.
       </span>
-      <span style="display:block; margin-top:.3em;
-                   font-size:clamp(10px, .95vw, 12px); letter-spacing:.18em;
-                   text-transform:uppercase; color:#94a3b8; font-weight:500;
-                   text-shadow:0 1px 3px rgba(0,0,0,.55);">
-        ↳ &nbsp;You can literally perceive how small the other sections feel in comparison to this technology display, huh? Like, AI iterally makes what's in the center feel small, huh? What kind of technology do i have for you? Where when you scroll past this graphic section you can feel your peceptions of it missing, somehow, very interesting technology.
+      <span class="focus-arrow gold">
+        <span class="arr">↳</span>You can <span class="key">LITERALLY PERCEIVE</span> how <span class="key-rose">SMALL</span> the other sections feel in comparison to this technology display, huh? Like, AI literally makes <span class="key-cyan">WHAT'S IN THE CENTER FEEL SMALL</span>, huh? <span class="key">What kind of technology do I have for you?</span> Where when you scroll past this graphic section you can feel your <span class="key-rose">PERCEPTIONS OF IT MISSING</span>, somehow — <span class="key-green">very interesting technology</span>.
       </span>
     </figcaption>
     <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start;">
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -814,10 +964,10 @@
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -826,19 +976,7 @@
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
-      </a>
-      <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
-                border:1.5px solid rgba(232,121,249,.55);
-                border-radius:14px; overflow:hidden;
-                box-shadow:0 0 32px rgba(232,121,249,.18);
-                transition:box-shadow .2s ease, transform .2s ease;"
-         onmouseover="this.style.boxShadow='0 0 48px rgba(232,121,249,.36)'; this.style.transform='translateY(-1px)'"
-         onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
-        <img src="background-mycopyrightlrelsmall.png"
-             alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
     </div>
   </figure>
@@ -898,14 +1036,24 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
               color:var(--ink);
               text-shadow:0 1px 6px rgba(0,0,0,.55);">
     <span style="display:block; font-size:clamp(14px, 1.35vw, 18px); letter-spacing:.16em; text-transform:uppercase; color:#e879f9; font-weight:800; margin-bottom:.6em;">🖼  MAKE IMAGES LIKE THIS:</span>
-    <div style="white-space:pre-wrap; margin-bottom:1em;">Epic Alien Technology like illusions on a plain white background — unlike traditional 3D images.
-Absolutely no one in the world can make illusions like this without using a NON‑PLAIN‑WHITE background! Unless they use WSRF!
-↳  CREATED FROM THE FLAT PLAIN SOURCE MATERIAL. NOBODY CAN DO THIS WITHOUT WSRF.
-↳  COMPARE THAT WITH OTHER IMAGES AND FEEL YOUR HAIR ON YOUR ARMS STAND UP AS YOU REALIZE OUR LEVEL OF TECHNOLOGY SHOWCASE.
-↳  YOU CAN LITERALLY PERCEIVE HOW SMALL THE OTHER SECTIONS FEEL IN COMPARISON TO THIS TECHNOLOGY DISPLAY, HUH? LIKE, AI ITERALLY MAKES WHAT'S IN THE CENTER FEEL SMALL, HUH? WHAT KIND OF TECHNOLOGY DO I HAVE FOR YOU? WHERE WHEN YOU SCROLL PAST THIS GRAPHIC SECTION YOU CAN FEEL YOUR PECEPTIONS OF IT MISSING, SOMEHOW, VERY INTERESTING TECHNOLOGY.</div>
+    <div style="white-space:pre-wrap; margin-bottom:1em;">Epic Alien Technology like illusions on a plain white background — unlike traditional 3D images.</div>
+    <div class="wsrf-flashy">
+      <span>⚡ Absolutely <u>NO ONE</u> in the world can make illusions like the two JW logo images below without using a</span>
+      <span class="nonwhite">NON‑PLAIN‑WHITE background</span>!
+      <span style="display:block; margin-top:.3em;">Unless they use <span class="wsrf">WSRF</span>! ⚡</span>
+    </div>
+    <div class="focus-arrow green">
+      <span class="arr">↳</span>Created from the <span class="key">FLAT PLAIN SOURCE MATERIAL</span>. <span class="key-rose">NOBODY</span> can do this without <span class="key-green">WSRF</span>.
+    </div>
+    <div class="focus-arrow rose">
+      <span class="arr">↳</span>Compare that with other images and <span class="key-rose">FEEL YOUR HAIR ON YOUR ARMS STAND UP</span> as you realize <span class="key">OUR LEVEL OF TECHNOLOGY SHOWCASE</span>.
+    </div>
+    <div class="focus-arrow gold">
+      <span class="arr">↳</span>You can <span class="key">LITERALLY PERCEIVE</span> how <span class="key-rose">SMALL</span> the other sections feel in comparison to this technology display, huh? Like, AI literally makes <span class="key-cyan">WHAT'S IN THE CENTER FEEL SMALL</span>, huh? <span class="key">What kind of technology do I have for you?</span> Where when you scroll past this graphic section you can feel your <span class="key-rose">PERCEPTIONS OF IT MISSING</span>, somehow — <span class="key-green">very interesting technology</span>.
+    </div>
     <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start;">
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -914,10 +1062,10 @@ Absolutely no one in the world can make illusions like this without using a NON�
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -926,19 +1074,7 @@ Absolutely no one in the world can make illusions like this without using a NON�
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
-      </a>
-      <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
-                border:1.5px solid rgba(232,121,249,.55);
-                border-radius:14px; overflow:hidden;
-                box-shadow:0 0 32px rgba(232,121,249,.18);
-                transition:box-shadow .2s ease, transform .2s ease;"
-         onmouseover="this.style.boxShadow='0 0 48px rgba(232,121,249,.36)'; this.style.transform='translateY(-1px)'"
-         onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
-        <img src="background-mycopyrightlrelsmall.png"
-             alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
     </div>
   </div>
@@ -1042,14 +1178,24 @@ Absolutely no one in the world can make illusions like this without using a NON�
               color:var(--ink);
               text-shadow:0 1px 6px rgba(0,0,0,.55);">
     <span style="display:block; font-size:clamp(14px, 1.35vw, 18px); letter-spacing:.16em; text-transform:uppercase; color:#e879f9; font-weight:800; margin-bottom:.6em;">🖼  MAKE IMAGES LIKE THIS:</span>
-    <div style="white-space:pre-wrap; margin-bottom:1em;">Epic Alien Technology like illusions on a plain white background — unlike traditional 3D images.
-Absolutely no one in the world can make illusions like this without using a NON‑PLAIN‑WHITE background! Unless they use WSRF!
-↳  CREATED FROM THE FLAT PLAIN SOURCE MATERIAL. NOBODY CAN DO THIS WITHOUT WSRF.
-↳  COMPARE THAT WITH OTHER IMAGES AND FEEL YOUR HAIR ON YOUR ARMS STAND UP AS YOU REALIZE OUR LEVEL OF TECHNOLOGY SHOWCASE.
-↳  YOU CAN LITERALLY PERCEIVE HOW SMALL THE OTHER SECTIONS FEEL IN COMPARISON TO THIS TECHNOLOGY DISPLAY, HUH? LIKE, AI ITERALLY MAKES WHAT'S IN THE CENTER FEEL SMALL, HUH? WHAT KIND OF TECHNOLOGY DO I HAVE FOR YOU? WHERE WHEN YOU SCROLL PAST THIS GRAPHIC SECTION YOU CAN FEEL YOUR PECEPTIONS OF IT MISSING, SOMEHOW, VERY INTERESTING TECHNOLOGY.</div>
+    <div style="white-space:pre-wrap; margin-bottom:1em;">Epic Alien Technology like illusions on a plain white background — unlike traditional 3D images.</div>
+    <div class="wsrf-flashy">
+      <span>⚡ Absolutely <u>NO ONE</u> in the world can make illusions like the two JW logo images below without using a</span>
+      <span class="nonwhite">NON‑PLAIN‑WHITE background</span>!
+      <span style="display:block; margin-top:.3em;">Unless they use <span class="wsrf">WSRF</span>! ⚡</span>
+    </div>
+    <div class="focus-arrow green">
+      <span class="arr">↳</span>Created from the <span class="key">FLAT PLAIN SOURCE MATERIAL</span>. <span class="key-rose">NOBODY</span> can do this without <span class="key-green">WSRF</span>.
+    </div>
+    <div class="focus-arrow rose">
+      <span class="arr">↳</span>Compare that with other images and <span class="key-rose">FEEL YOUR HAIR ON YOUR ARMS STAND UP</span> as you realize <span class="key">OUR LEVEL OF TECHNOLOGY SHOWCASE</span>.
+    </div>
+    <div class="focus-arrow gold">
+      <span class="arr">↳</span>You can <span class="key">LITERALLY PERCEIVE</span> how <span class="key-rose">SMALL</span> the other sections feel in comparison to this technology display, huh? Like, AI literally makes <span class="key-cyan">WHAT'S IN THE CENTER FEEL SMALL</span>, huh? <span class="key">What kind of technology do I have for you?</span> Where when you scroll past this graphic section you can feel your <span class="key-rose">PERCEPTIONS OF IT MISSING</span>, somehow — <span class="key-green">very interesting technology</span>.
+    </div>
     <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start;">
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -1058,10 +1204,10 @@ Absolutely no one in the world can make illusions like this without using a NON�
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -1070,19 +1216,7 @@ Absolutely no one in the world can make illusions like this without using a NON�
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
-      </a>
-      <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
-                border:1.5px solid rgba(232,121,249,.55);
-                border-radius:14px; overflow:hidden;
-                box-shadow:0 0 32px rgba(232,121,249,.18);
-                transition:box-shadow .2s ease, transform .2s ease;"
-         onmouseover="this.style.boxShadow='0 0 48px rgba(232,121,249,.36)'; this.style.transform='translateY(-1px)'"
-         onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
-        <img src="background-mycopyrightlrelsmall.png"
-             alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
     </div>
   </div>
@@ -1148,36 +1282,24 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
                    text-shadow:0 1px 4px rgba(0,0,0,.55);">
         Epic Alien Technology like illusions on a plain white background — unlike traditional 3D images.
       </span>
-      <span style="display:block; margin-top:.55em;
-                   font-size:clamp(13px, 1.25vw, 16.5px);
-                   color:#fde68a; font-weight:600; line-height:1.5;
-                   text-shadow:0 0 10px rgba(253,230,138,.35), 0 1px 4px rgba(0,0,0,.7);">
-        Absolutely no one in the world can make illusions like this without using a
-        <em style="color:#e879f9; font-style:normal; font-weight:700;">NON&#8209;PLAIN&#8209;WHITE background</em>!
-        Unless they use <strong style="color:#6ef0a8; font-weight:800; letter-spacing:.02em;">WSRF</strong>!
+      <span class="wsrf-flashy">
+        <span>⚡ Absolutely <u>NO ONE</u> in the world can make illusions like the two JW logo images below without using a</span>
+        <span class="nonwhite">NON&#8209;PLAIN&#8209;WHITE background</span>!
+        <span style="display:block; margin-top:.3em;">Unless they use <span class="wsrf">WSRF</span>! ⚡</span>
       </span>
-      <span style="display:block; margin-top:.5em;
-                   font-size:clamp(10px, .95vw, 12px); letter-spacing:.18em;
-                   text-transform:uppercase; color:#94a3b8; font-weight:500;
-                   text-shadow:0 1px 3px rgba(0,0,0,.55);">
-        ↳ &nbsp;Created from the flat plain source material. Nobody can do this without <strong style="color:#6ef0a8; font-weight:800; letter-spacing:.02em;">WSRF</strong>.
+      <span class="focus-arrow green">
+        <span class="arr">↳</span>Created from the <span class="key">FLAT PLAIN SOURCE MATERIAL</span>. <span class="key-rose">NOBODY</span> can do this without <span class="key-green">WSRF</span>.
       </span>
-      <span style="display:block; margin-top:.3em;
-                   font-size:clamp(10px, .95vw, 12px); letter-spacing:.18em;
-                   text-transform:uppercase; color:#94a3b8; font-weight:500;
-                   text-shadow:0 1px 3px rgba(0,0,0,.55);">
-        ↳ &nbsp;Compare that with other images and feel your hair on your arms stand up as you realize our level of technology showcase.
+      <span class="focus-arrow rose">
+        <span class="arr">↳</span>Compare that with other images and <span class="key-rose">FEEL YOUR HAIR ON YOUR ARMS STAND UP</span> as you realize <span class="key">OUR LEVEL OF TECHNOLOGY SHOWCASE</span>.
       </span>
-      <span style="display:block; margin-top:.3em;
-                   font-size:clamp(10px, .95vw, 12px); letter-spacing:.18em;
-                   text-transform:uppercase; color:#94a3b8; font-weight:500;
-                   text-shadow:0 1px 3px rgba(0,0,0,.55);">
-        ↳ &nbsp;You can literally perceive how small the other sections feel in comparison to this technology display, huh? Like, AI iterally makes what's in the center feel small, huh? What kind of technology do i have for you? Where when you scroll past this graphic section you can feel your peceptions of it missing, somehow, very interesting technology.
+      <span class="focus-arrow gold">
+        <span class="arr">↳</span>You can <span class="key">LITERALLY PERCEIVE</span> how <span class="key-rose">SMALL</span> the other sections feel in comparison to this technology display, huh? Like, AI literally makes <span class="key-cyan">WHAT'S IN THE CENTER FEEL SMALL</span>, huh? <span class="key">What kind of technology do I have for you?</span> Where when you scroll past this graphic section you can feel your <span class="key-rose">PERCEPTIONS OF IT MISSING</span>, somehow — <span class="key-green">very interesting technology</span>.
       </span>
     </figcaption>
     <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start;">
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -1186,10 +1308,10 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
       <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
+         style="display:block; flex:0 0 auto;
                 border:1.5px solid rgba(232,121,249,.55);
                 border-radius:14px; overflow:hidden;
                 box-shadow:0 0 32px rgba(232,121,249,.18);
@@ -1198,19 +1320,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
          onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
         <img src="background-mycopyrightlrelsmall.png"
              alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
-      </a>
-      <a href="background-mycopyrightlrelsmall.png" target="_blank" rel="noopener"
-         style="display:block; flex:0 1 calc(30% - 9.33px); min-width:160px;
-                border:1.5px solid rgba(232,121,249,.55);
-                border-radius:14px; overflow:hidden;
-                box-shadow:0 0 32px rgba(232,121,249,.18);
-                transition:box-shadow .2s ease, transform .2s ease;"
-         onmouseover="this.style.boxShadow='0 0 48px rgba(232,121,249,.36)'; this.style.transform='translateY(-1px)'"
-         onmouseout="this.style.boxShadow='0 0 32px rgba(232,121,249,.18)'; this.style.transform='translateY(0)'">
-        <img src="background-mycopyrightlrelsmall.png"
-             alt="Make images like this — sample artwork"
-             style="display:block; width:100%; height:auto;" />
+             style="display:block;" />
       </a>
     </div>
   </figure>
