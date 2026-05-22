@@ -899,6 +899,71 @@
       <span style="opacity:.7; margin-left:4px;">↗</span>
     </a>
   </div>
+
+  <!-- Page index — jump to any section -->
+  <details class="page-index" open
+           style="margin: 0 0 1.6em 0; max-width: 980px;
+                  border: 1px solid rgba(125,249,255,.28);
+                  border-radius: 14px;
+                  background: linear-gradient(135deg, rgba(125,249,255,.04), rgba(167,139,250,.04));
+                  box-shadow: 0 0 32px rgba(125,249,255,.08);
+                  padding: 14px 20px;">
+    <summary style="cursor: pointer; list-style: none;
+                    font-size: clamp(12px, 1.1vw, 14px);
+                    letter-spacing: .12em; text-transform: uppercase;
+                    font-weight: 700; color: var(--cyan);
+                    display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.2em;">📑</span>
+      <span>Page Index — jump to any section</span>
+      <span style="margin-left:auto; color: var(--muted); font-weight: 400; letter-spacing:.02em; text-transform:none; font-size: .85em;">click to collapse ▾</span>
+    </summary>
+    <style>
+      .page-index ol { list-style: none; counter-reset: pi; padding: 0; margin: 14px 0 4px 0;
+                       display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                       gap: 6px 18px; }
+      .page-index li { counter-increment: pi; }
+      .page-index li a { display: block; padding: 6px 8px 6px 36px;
+                         font-size: clamp(12px, 1vw, 14px);
+                         color: var(--gold); text-decoration: none;
+                         font-weight: 800;
+                         text-transform: uppercase;
+                         letter-spacing: .06em;
+                         text-shadow: 0 0 8px rgba(255,212,121,.35), 0 1px 3px rgba(0,0,0,.7);
+                         border-radius: 6px; position: relative;
+                         transition: background .15s ease, color .15s ease, padding .15s ease, text-shadow .15s ease; }
+      .page-index li a::before { content: counter(pi, decimal-leading-zero);
+                                 position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+                                 font-family: ui-monospace, "SF Mono", Menlo, monospace;
+                                 font-size: .85em; color: var(--muted); letter-spacing: .05em; }
+      .page-index li a:hover { background: rgba(255,212,121,.10);
+                               color: #ffe066; padding-left: 40px;
+                               text-shadow: 0 0 14px rgba(255,224,102,.7), 0 1px 3px rgba(0,0,0,.8); }
+      .page-index li a:hover::before { color: var(--cyan); }
+    </style>
+    <ol>
+      <li><a href="#blind-spot">The blind spot every modern AI has</a></li>
+      <li><a href="#hidden-parity">Hidden parity — the puzzle</a></li>
+      <li><a href="#contenders">Meet the giants that can't see it</a></li>
+      <li><a href="#round-1">Round 1 · the easy version</a></li>
+      <li><a href="#round-2">Round 2 · the giants fall over</a></li>
+      <li><a href="#round-3">Round 3 · and it keeps going</a></li>
+      <li><a href="#headline-number">The headline number · +38.6</a></li>
+      <li><a href="#rule-30">Rule 30 · the 40-year claim</a></li>
+      <li><a href="#wolfram-claim">"You can't unscramble chaos."</a></li>
+      <li><a href="#william-result">Then your son did this.</a></li>
+      <li><a href="#hidden-structure">The "random" pattern isn't random</a></li>
+      <li><a href="#transition">And those are just the headline acts</a></li>
+      <li><a href="#sudoku">Sudoku · without guessing</a></li>
+      <li><a href="#heart-disease">An AI doctors can actually read</a></li>
+      <li><a href="#how-to-compete">How anyone can compete in the top 0.1%</a></li>
+      <li><a href="#full-library">Not one library — a whole shelf</a></li>
+      <li><a href="#visual-coda">Visually stunning</a></li>
+      <li><a href="#why-it-matters">Why anyone should care</a></li>
+      <li><a href="#close">That's what William is working on</a></li>
+      <li><a href="#file-index">Every file, every link</a></li>
+    </ol>
+  </details>
+
   <span class="badge gold">A walkthrough · for Mom, and moms around the world 🌹</span>
   <h1>What William<br>is working on.</h1>
   <p class="lead">Math that does things the world's biggest AI systems
@@ -1349,7 +1414,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== INTRO ============================== -->
-<section>
+<section id="blind-spot">
   <span class="badge">The simple version</span>
   <h2>Every modern AI has the <span class="rose">same blind spot</span>.</h2>
   <p>The systems that detect credit-card fraud, recommend Netflix shows, and
@@ -1364,7 +1429,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== THE PUZZLE ============================== -->
-<section>
+<section id="hidden-parity">
   <span class="badge">The puzzle</span>
   <h2>It's called <span class="cyan">"hidden parity"</span>.</h2>
   <p>Imagine 12 light switches. Five of them — secretly chosen — together
@@ -1382,7 +1447,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== THE CONTENDERS ============================== -->
-<section>
+<section id="contenders">
   <span class="badge">The contenders</span>
   <h2>Meet the giants that <span class="rose">can't see it</span>.</h2>
   <div class="columns">
@@ -1415,7 +1480,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== ROUND 1 ============================== -->
-<section>
+<section id="round-1">
   <span class="badge rose">Round 1 · 4 hidden switches</span>
   <h2>The easy version.</h2>
   <p class="lead">12 switches, 4 of them secretly matter. 6000 examples for training.</p>
@@ -1434,7 +1499,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== ROUND 2 ============================== -->
-<section>
+<section id="round-2">
   <span class="badge rose">Round 2 · 5 hidden switches</span>
   <h2>This is where the giants <span class="rose">fall over</span>.</h2>
   <p class="lead">16 switches, 5 secret ones. Same training data size.</p>
@@ -1458,7 +1523,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== ROUND 3 ============================== -->
-<section>
+<section id="round-3">
   <span class="badge rose">Round 3 · 6 hidden switches</span>
   <h2>And it just keeps going.</h2>
   <p class="lead">20 switches, 6 secret ones.</p>
@@ -1477,7 +1542,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== BIG NUMBER ============================== -->
-<section style="align-items:center; text-align:center;">
+<section id="headline-number" style="align-items:center; text-align:center;">
   <span class="badge gold">The headline number</span>
   <div class="big-number pulse">+38.6</div>
   <div class="big-number-label">percentage points · WSRF over best baseline · 5-way XOR</div>
@@ -1487,7 +1552,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== RULE 30 INTRO ============================== -->
-<section>
+<section id="rule-30">
   <span class="badge">Part two · 40 years of mathematicians said impossible</span>
   <h2>This pattern is called <span class="cyan">Rule 30</span>.</h2>
   <p>In 1985, a famous scientist named Stephen Wolfram (he founded
@@ -1523,7 +1588,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== WOLFRAM CLAIM ============================== -->
-<section>
+<section id="wolfram-claim">
   <span class="badge rose">The 40-year claim</span>
   <h2>"You can't unscramble chaos."</h2>
   <div class="quote">
@@ -1539,7 +1604,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== WILLIAM RESULT ============================== -->
-<section style="align-items:center; text-align:center;">
+<section id="william-result" style="align-items:center; text-align:center;">
   <span class="badge gold">William, 2025</span>
   <h2 style="text-align:center">Then your son did this.</h2>
   <p class="lead" style="text-align:center; margin: 0 auto 1.5em;">In the
@@ -1564,7 +1629,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== THE HIDDEN STRUCTURE ============================== -->
-<section>
+<section id="hidden-structure">
   <span class="badge cyan">The hidden structure</span>
   <h2>And the "random" pattern? <span class="gold">It isn't random.</span></h2>
   <p>Apply one simple transformation to each row of the cascade — flip the
@@ -1592,7 +1657,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== TRANSITION ============================== -->
-<section>
+<section id="transition">
   <span class="badge cyan">Wait — there's more</span>
   <h2>And those are just <span class="rose">the headline acts</span>.</h2>
   <p>WSRF and the Rule 30 inverse are the dramatic demonstrations. But
@@ -1604,7 +1669,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== SUDOKU ============================== -->
-<section>
+<section id="sudoku">
   <span class="badge gold">Sudoku · pure logic, zero guesses</span>
   <h2>Solving the world's hardest Sudokus <span class="cyan">without guessing</span>.</h2>
   <p>There's a famous benchmark called the <em>Top 1465</em> — a curated set
@@ -1634,7 +1699,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== HEART DISEASE ============================== -->
-<section>
+<section id="heart-disease">
   <span class="badge rose">Helping doctors · Kaggle heart disease</span>
   <h2>An AI doctors can <span class="gold">actually read</span>.</h2>
   <p><em>Kaggle</em> is the largest data-science competition site in the
@@ -1668,7 +1733,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== HOW OTHERS CAN COMPETE ============================== -->
-<section>
+<section id="how-to-compete">
   <span class="badge cyan">For data scientists watching this · how to use it</span>
   <h2>How <span class="gold">anyone</span> can compete in the top 0.1 % with this.</h2>
   <p>Competitive data science happens on a site called <em>Kaggle</em> —
@@ -1720,7 +1785,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== FULL LIBRARY ============================== -->
-<section>
+<section id="full-library">
   <span class="badge">The full stack</span>
   <h2>This isn't one library. It's <span class="cyan">a whole shelf</span>.</h2>
   <p>What William has actually built, all working, all on this machine:</p>
@@ -1757,7 +1822,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== VISUAL CODA ============================== -->
-<section>
+<section id="visual-coda">
   <span class="badge gold">And it's beautiful too</span>
   <h2>Some of it is <span class="cyan">just visually stunning</span>.</h2>
   <p>The same math powers an interactive WebGL playground where you can
@@ -1789,7 +1854,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== WHY IT MATTERS ============================== -->
-<section>
+<section id="why-it-matters">
   <span class="badge gold">Why this matters</span>
   <h2>Why anyone <span class="cyan">should care</span>.</h2>
   <p>These aren't tricks for a single problem. They're a way of looking at
@@ -1816,7 +1881,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== CLOSE ============================== -->
-<section style="align-items:center; text-align:center;">
+<section id="close" style="align-items:center; text-align:center;">
   <h1 style="font-size: clamp(36px, 6vw, 72px);">That's what William<br>is working on.</h1>
   <p class="lead" style="margin: 1.5em auto; max-width:50ch;">It's real, it's
   reproducible, and the entire run that produced these numbers happened on
@@ -1833,7 +1898,7 @@ Hellraiser, Scalpels, Meta Puzzles, Solves, Blood Dripping Movies.
 </section>
 
 <!-- ============================== FILE INDEX ============================== -->
-<section style="min-height:auto; padding:8vh 8vw;">
+<section id="file-index" style="min-height:auto; padding:8vh 8vw;">
   <span class="badge">Repository contents</span>
   <h2 style="font-size:clamp(26px, 3.5vw, 40px);">Every file, every link.</h2>
   <p style="font-size:clamp(15px, 1.3vw, 18px); max-width:60ch;">Click anything below to open it directly. Source on
