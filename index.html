@@ -712,44 +712,85 @@
 
 <!-- Playlist player: 1.mp3 → 5.mp3 → loop. Starts muted; user clicks to unmute. -->
 <audio id="bg-audio" autoplay muted loop preload="auto" src="1.mp3"></audio>
-<button id="bg-audio-toggle" type="button" aria-label="Click here to play music"
-        style="position:fixed; top:14px; left:14px; z-index:9999;
-               padding: 10px 18px;
-               display:inline-flex; align-items:center; gap:10px;
-               border:1.5px solid rgba(125,249,255,.65);
-               border-radius:100px;
-               background: rgba(6,7,13,.82);
-               color: var(--cyan, #7df9ff);
-               font-size: clamp(12px, 1.1vw, 14px);
-               font-weight: 700;
-               letter-spacing: .08em;
-               text-transform: uppercase;
-               line-height: 1;
-               cursor:pointer;
-               backdrop-filter: blur(6px);
-               -webkit-backdrop-filter: blur(6px);
-               box-shadow: 0 4px 16px rgba(0,0,0,.55), 0 0 24px rgba(125,249,255,.22);
-               transition: background .15s ease, box-shadow .15s ease, transform .15s ease;"
-        onmouseover="this.style.background='rgba(125,249,255,.14)'; this.style.boxShadow='0 4px 18px rgba(0,0,0,.6), 0 0 36px rgba(125,249,255,.40)'"
-        onmouseout="this.style.background='rgba(6,7,13,.82)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,.55), 0 0 24px rgba(125,249,255,.22)'">
-  <span id="bg-audio-icon" style="font-size:1.35em;">🔇</span>
-  <span id="bg-audio-label">Click here to play music</span>
-</button>
+<div id="bg-audio-controls"
+     style="position:fixed; top:14px; left:14px; z-index:9999;
+            display:flex; align-items:center; gap:10px;">
+  <button id="bg-audio-next" type="button" aria-label="Next song"
+          title="Next song"
+          style="width:44px; height:44px; padding:0;
+                 display:flex; align-items:center; justify-content:center;
+                 border:1.5px solid rgba(167,139,250,.65);
+                 border-radius:50%;
+                 background: rgba(6,7,13,.82);
+                 color: var(--violet, #a78bfa);
+                 font-size: 18px; line-height: 1;
+                 cursor:pointer;
+                 backdrop-filter: blur(6px);
+                 -webkit-backdrop-filter: blur(6px);
+                 box-shadow: 0 4px 16px rgba(0,0,0,.55), 0 0 24px rgba(167,139,250,.22);
+                 transition: background .15s ease, box-shadow .15s ease, transform .15s ease;"
+          onmouseover="this.style.background='rgba(167,139,250,.16)'; this.style.boxShadow='0 4px 18px rgba(0,0,0,.6), 0 0 36px rgba(167,139,250,.45)'"
+          onmouseout="this.style.background='rgba(6,7,13,.82)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,.55), 0 0 24px rgba(167,139,250,.22)'">
+    <span style="display:inline-flex; align-items:center; gap:1px;">
+      <span>▶</span><span>▶</span>
+    </span>
+  </button>
+  <button id="bg-audio-toggle" type="button" aria-label="Click here to play music"
+          style="padding: 10px 18px;
+                 display:inline-flex; align-items:center; gap:10px;
+                 border:1.5px solid rgba(125,249,255,.65);
+                 border-radius:100px;
+                 background: rgba(6,7,13,.82);
+                 color: var(--cyan, #7df9ff);
+                 font-size: clamp(12px, 1.1vw, 14px);
+                 font-weight: 700;
+                 letter-spacing: .08em;
+                 text-transform: uppercase;
+                 line-height: 1;
+                 cursor:pointer;
+                 backdrop-filter: blur(6px);
+                 -webkit-backdrop-filter: blur(6px);
+                 box-shadow: 0 4px 16px rgba(0,0,0,.55), 0 0 24px rgba(125,249,255,.22);
+                 transition: background .15s ease, box-shadow .15s ease, transform .15s ease;"
+          onmouseover="this.style.background='rgba(125,249,255,.14)'; this.style.boxShadow='0 4px 18px rgba(0,0,0,.6), 0 0 36px rgba(125,249,255,.40)'"
+          onmouseout="this.style.background='rgba(6,7,13,.82)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,.55), 0 0 24px rgba(125,249,255,.22)'">
+    <span id="bg-audio-icon" style="font-size:1.35em;">🔇</span>
+    <span id="bg-audio-label">Click here to play music</span>
+  </button>
+</div>
 <script>
   (function () {
     var audio    = document.getElementById('bg-audio');
     var btn      = document.getElementById('bg-audio-toggle');
+    var nextBtn  = document.getElementById('bg-audio-next');
     var icon     = document.getElementById('bg-audio-icon');
-    var playlist = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3'];
+    var playlist = ['1.mp3','2.mp3','3.mp3','4.mp3','5.mp3',
+                    '6.mp3','7.mp3','8.mp3','9.mp3','10.mp3'];
     var idx      = 0;
 
     // We manage looping across multiple tracks ourselves — disable single-track loop.
     audio.loop = false;
 
-    audio.addEventListener('ended', function () {
-      idx = (idx + 1) % playlist.length;
+    function playTrack(i) {
+      idx = ((i % playlist.length) + playlist.length) % playlist.length;
       audio.src = playlist[idx];
       audio.play().catch(function () {});
+    }
+
+    audio.addEventListener('ended', function () {
+      playTrack(idx + 1);
+    });
+
+    nextBtn.addEventListener('click', function () {
+      playTrack(idx + 1);
+    });
+
+    // If the next file 404s (or otherwise fails), fall back to track 1.
+    // Guard against infinite loop if 1.mp3 itself is missing.
+    audio.addEventListener('error', function () {
+      if (idx !== 0) {
+        playTrack(0);
+      }
     });
 
     var label = document.getElementById('bg-audio-label');
