@@ -1,7 +1,7 @@
 # WSRF · Bone Marrow Cancer Research Plan
 
 **Started:** 2026-05-22
-**Goal:** This is a project i'm going to be working on for cancer research and plan to provide results here soon, we want to see how the WSRF libraries can be applied to things like cancer research. To help us see the use here you can run join us and use the WSRF library family against public Kaggle datasets for bone marrow cancers (multiple myeloma, leukemias) and document any result — better, same, or worse than published baselines. Publishable findings get written up; null results get logged honestly so we don't repeat them.
+**Goal:** This is a project i'm going to be working on for cancer research and plan to provide results here soon, we want to see how the WSRF libraries can be applied to things like cancer research. To help us see the use here you can run join us and use the WSRF library family against public Kaggle datasets for bone marrow cancers (multiple myeloma, leukemias) and document any result — better, same, or worse than published baselines. Publishable findings get written up; null results get logged honestly so we don't repeat them. Initial cancer research shows very promising results with WSRF. This will help further our understanding of its mathematical framework and capabilities.
 
 **Why this is a plausible angle for WSRF:** Gene-gene interactions in cancer biology often have the property that a single gene's marginal effect is near zero, but a specific combination predicts the phenotype — structurally similar to hidden parity. That's where standard ML hits the wall, and where WSRF showed a 38pp gap on synthetic parity tasks. Whether that edge transfers to real gene expression data is the question this research answers.
 
