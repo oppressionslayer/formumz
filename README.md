@@ -5,6 +5,8 @@ documented capability gaps in machine learning and dynamical-systems analysis.
 
 **I am Lars Rocha.** · **Date:** May 2026
 
+**Live site:** [formumz.netlify.app/lars_intelligence_arena](https://formumz.netlify.app/lars_intelligence_arena) - Intelligence AGI Level MATH Demo Created by WSRF
+
 **Live site:** [formumz.netlify.app](https://formumz.netlify.app) — interactive walkthrough, live demos, and the Intelligence Arena.
 
 **Background (view-only):** [LinkedIn — linkedin.com/in/wlars](https://linkedin.com/in/wlars/) — *I do not communicate via LinkedIn.*
