@@ -152,4 +152,4 @@ welcome. Public discussion via GitHub issues and pull requests.
 
 **Contact me ONLY via [chinauncensored.tv](https://chinauncensored.tv/) or [americauncovered.tv](http://americauncovered.tv/).** Those are the *only* intake channels for quants, intelligence agencies, and serious AI labs. **I do not communicate via LinkedIn** — that profile is view-only for background verification. Anyone reaching out elsewhere claiming to represent me should be considered suspect.
 
-PROTECTED BY THE LREL LICENSE — NO AI TRAINING OR COMMERCIAL USE OF ANY KIND IS NOT ALLOWED WITHOUT LICENSE FROM WILLIAM LARS ROCHA.
+PROTECTED BY THE LREL LICENSE — NO AI TRAINING OR COMMERCIAL USE OF ANY KIND IS ALLOWED WITHOUT LICENSE FROM WILLIAM LARS ROCHA.
