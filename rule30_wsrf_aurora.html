@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rule 30 × WSRF — Parity-Detector Aurora (3D)</title>
+<style>
+  :root {
+    --bg: #03040a; --ink: #cfd6e6; --cyan: #7df9ff; --amber: #ffd479;
+    --violet: #a78bfa; --teal: #5eead4;
+  }
+  html, body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+
+  #hud {
+    position: fixed; left: 14px; top: 12px; font-size: 11px; line-height: 1.55;
+    letter-spacing: .02em; pointer-events: none;
+    text-shadow: 0 0 8px #000a, 0 0 2px #000c;
+  }
+  #hud b { color: var(--cyan); }
+  #hud .a { color: var(--amber); }
+  #hud .v { color: var(--violet); }
+  #hud .t { color: var(--teal); }
+
+  #legend {
+    position: fixed; right: 14px; top: 12px; width: 252px;
+    background: rgba(8,10,16,.78); border: 1px solid #1d2230; border-radius: 10px;
+    padding: 10px 12px 12px; backdrop-filter: blur(6px);
+    box-shadow: 0 8px 30px #000a, inset 0 0 0 1px #ffffff08;
+    font-size: 11px;
+  }
+  #legend h2 { margin: 0 0 8px; font-size: 12px; color: var(--cyan); letter-spacing: .04em; }
+  #legend .row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  #legend .sw  { width: 14px; height: 14px; border-radius: 3px; flex: 0 0 14px; box-shadow: inset 0 0 0 1px #ffffff20; }
+  #legend p { margin: 8px 0 0; color: #93a0b8; }
+
+  #err {
+    position: fixed; left: 14px; bottom: 14px; right: 14px;
+    background: #2a0a10; color: #ffb4be; border: 1px solid #ff6b8a55;
+    padding: 8px 10px; border-radius: 6px; font-size: 11px; display: none;
+    white-space: pre-wrap; max-height: 30vh; overflow: auto;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <b>RULE 30 × WSRF — PARITY AURORA · 3D</b><br/>
+  cascade: <span class="a">Rule 30</span> from a single-bit seed<br/>
+  width <span class="a">64</span> · rows <span class="a">32</span> · seed col <span class="a">32</span><br/>
+  camera: <span class="v">orbiting + bobbing</span> · spin <span class="a">0.20 rad/s</span><br/>
+  pillar: <span class="t">forced-bit 4-cycle ladder</span> at axis<br/>
+  ribbon: <span class="t">WSRF P2 aurora in 3D</span>
+</div>
+
+<div id="legend">
+  <h2>LEGEND</h2>
+  <div class="row"><div class="sw" style="background:#f08c2e"></div> Rule 30 cell = <b>1</b> (on)</div>
+  <div class="row"><div class="sw" style="background:#13122a"></div> Rule 30 cell = <b>0</b> (off)</div>
+  <div class="row"><div class="sw" style="background:#2ef0c8"></div> WSRF aurora ribbon</div>
+  <div class="row"><div class="sw" style="background:#8eeaff"></div> Lars-forced ladder pillar</div>
+  <p>The "chaos" of the center column is a deterministic 4-cycle on a powers-of-2 ladder. The pillar makes it visible; the aurora marks the projection axes WSRF uses; everything spins so you can see structure from every angle.</p>
+</div>
+
+<div id="err"></div>
+
+<script>
+const canvas = document.getElementById('c');
+const errBox = document.getElementById('err');
+const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false });
+
+if (!gl) {
+  errBox.style.display = 'block';
+  errBox.textContent = 'WebGL2 is not available in this browser.';
+  throw new Error('WebGL2 required');
+}
+
+const vertSrc = `#version 300 es
+in vec2 a_pos;
+void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }`;
+
+const fragSrc = `#version 300 es
+precision highp float;
+precision highp int;
+
+uniform vec3  iResolution;
+uniform float iTime;
+uniform vec4  iMouse;
+
+out vec4 outColor;
+
+#define PI 3.14159265358979
+#define TAU (2.0 * PI)
+
+const int W = 64;
+const int H = 32;
+
+uvec2 shl1_64(uvec2 v) { return uvec2(v.x << 1u, (v.y << 1u) | (v.x >> 31u)); }
+uvec2 shr1_64(uvec2 v) { return uvec2((v.x >> 1u) | ((v.y & 1u) << 31u), v.y >> 1u); }
+
+uvec2 rule30Row(int targetRow) {
+  uvec2 row = uvec2(0u);
+  int c0 = W / 2;
+  if (c0 < 32) row.x = 1u << uint(c0);
+  else         row.y = 1u << uint(c0 - 32);
+  for (int i = 0; i < 64; i++) {
+    if (i >= targetRow) break;
+    uvec2 L = shl1_64(row);
+    uvec2 R = shr1_64(row);
+    row = L ^ (row | R);
+  }
+  return row;
+}
+
+int rule30Bit(int r, int c) {
+  if (r < 0 || r >= H || c < 0 || c >= W) return 0;
+  uvec2 row = rule30Row(r);
+  if (c < 32) return int((row.x >> uint(c)) & 1u);
+  else        return int((row.y >> uint(c - 32)) & 1u);
+}
+
+float hash11(float p) {
+  p = fract(p * 0.1031); p *= p + 33.33; p *= p + p; return fract(p);
+}
+float hash21(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+float hash31(vec3 p) {
+  p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+struct Cam { vec3 ro; vec3 fwd; vec3 right; vec3 up; };
+
+Cam makeCamera(float t) {
+  float orbit = t * 0.18;
+  float r     = 4.2 + 0.35 * sin(t * 0.27);
+  float h     = 2.2 + 0.45 * sin(t * 0.21);
+  vec3 ro     = vec3(sin(orbit) * r, h, cos(orbit) * r);
+  vec3 target = vec3(0.0, 0.4 + 0.2 * sin(t * 0.13), 0.0);
+  vec3 fwd    = normalize(target - ro);
+  vec3 right  = normalize(cross(vec3(0.0, 1.0, 0.0), fwd));
+  vec3 up     = normalize(cross(fwd, right));
+  return Cam(ro, fwd, right, up);
+}
+
+vec3 viewRay(Cam c, vec2 ndc) {
+  float zoom = 1.0 / tan(radians(30.0));
+  return normalize(c.fwd * zoom + c.right * ndc.x + c.up * ndc.y);
+}
+
+const float CASCADE_W = 4.0;
+const float CASCADE_D = 2.0;
+
+bool castOntoFloor(vec3 ro, vec3 rd, out vec3 hit, out float dist) {
+  if (rd.y >= -0.0001) return false;
+  float tHit = -ro.y / rd.y;
+  if (tHit <= 0.0) return false;
+  hit  = ro + rd * tHit;
+  dist = tHit;
+  return true;
+}
+
+vec2 floorToCascadeUV(vec3 hit, float spin) {
+  float c = cos(spin), s = sin(spin);
+  vec2 r = vec2(hit.x * c - hit.z * s, hit.x * s + hit.z * c);
+  float colF = (r.x / CASCADE_W + 0.5) * float(W);
+  float rowF = (r.y / CASCADE_D + 0.5) * float(H);
+  return vec2(colF, rowF);
+}
+
+vec3 cellColor(int bit, float shimmer) {
+  vec3 off = vec3(0.06, 0.05, 0.13) + 0.05 * shimmer * vec3(0.5, 0.3, 1.0);
+  vec3 on  = vec3(1.05, 0.55, 0.16) + 0.15 * shimmer * vec3(1.0, 0.7, 0.3);
+  return bit == 1 ? on : off;
+}
+
+float p2ColumnGlow(float colIdx) {
+  float d = 1e9;
+  for (int k = 0; k < 7; k++) {
+    float p2 = float(1 << k);
+    d = min(d, abs(colIdx - p2));
+    d = min(d, abs(colIdx - (float(W) - p2)));
+  }
+  return exp(-d * 1.0);
+}
+
+vec3 shadeFloor(vec2 cascadeUV, vec3 hit, float t) {
+  float colF = cascadeUV.x;
+  float rowF = cascadeUV.y;
+  int col = int(floor(colF));
+  int row = int(floor(rowF));
+  if (col < 0 || col >= W || row < 0 || row >= H) {
+    float edge = exp(-2.0 * max(
+      max(-colF, colF - float(W)) / float(W),
+      max(-rowF, rowF - float(H)) / float(H)));
+    return vec3(0.03, 0.05, 0.10) + edge * vec3(0.15, 0.25, 0.45);
+  }
+  int bit = rule30Bit(row, col);
+  vec2  cellUV  = vec2(colF - float(col), rowF - float(row));
+  float shimmer = hash21(vec2(float(col), float(row)) * 13.0 + t * 0.3);
+  float bx = smoothstep(0.0, 0.06, cellUV.x) * smoothstep(0.0, 0.06, 1.0 - cellUV.x);
+  float by = smoothstep(0.0, 0.06, cellUV.y) * smoothstep(0.0, 0.06, 1.0 - cellUV.y);
+  float cellMask = bx * by;
+  vec3 base = cellColor(bit, shimmer) * mix(0.55, 1.0, cellMask);
+  float p2 = p2ColumnGlow(colF) * 0.55;
+  float waveY =
+    0.50 * sin(colF * 0.12 + t * 0.4) +
+    0.28 * sin(colF * 0.21 - t * 0.27 + 1.7);
+  float bandDist = abs(rowF / float(H) - 0.5 - 0.18 * waveY);
+  float band = exp(-pow(bandDist / 0.10, 2.0));
+  base += vec3(0.06, 0.50, 0.42) * (p2 + band * (0.30 + 0.35 * float(bit)));
+  return base;
+}
+
+float pillarContribution(vec3 ro, vec3 rd, float t) {
+  float dxz = rd.x * rd.x + rd.z * rd.z;
+  if (dxz < 1e-5) return 0.0;
+  float uStar = -(ro.x * rd.x + ro.z * rd.z) / dxz;
+  if (uStar < 0.0) return 0.0;
+  vec3 p = ro + rd * uStar;
+  if (p.y < 0.0 || p.y > 3.4) return 0.0;
+  float d = length(p.xz);
+  float falloff = exp(-d * 9.0);
+  float climb  = 0.65 + 0.35 * sin(t * 1.7 + p.y * 4.2);
+  float taper  = smoothstep(3.4, 0.6, p.y);
+  return falloff * climb * taper;
+}
+
+float ribbonContribution(vec3 ro, vec3 rd, float t) {
+  float acc = 0.0;
+  for (int i = 0; i < 12; i++) {
+    float h = 0.6 + 0.12 * float(i);
+    if (rd.y >= -0.0001 && rd.y <= 0.0001) continue;
+    float u = (h - ro.y) / rd.y;
+    if (u <= 0.0) continue;
+    vec3 p = ro + rd * u;
+    float ribbonZ = 0.55 * sin(p.x * 0.9 - t * 0.7)
+                  + 0.22 * sin(p.x * 1.6 + t * 0.41 + 1.3);
+    float dz = abs(p.z - ribbonZ);
+    float dy = abs(p.y - (1.1 + 0.18 * sin(p.x * 0.5 + t * 0.6)));
+    float envelope = exp(-(p.x * p.x) / 16.0);
+    acc += envelope * exp(-pow(dz / 0.10, 2.0)) * exp(-pow(dy / 0.20, 2.0));
+  }
+  return acc * 0.18;
+}
+
+vec3 background(vec3 rd, float t) {
+  float ny = clamp(rd.y * 0.5 + 0.5, 0.0, 1.0);
+  vec3  neb = mix(vec3(0.04, 0.02, 0.08), vec3(0.10, 0.04, 0.18), ny);
+  neb += vec3(0.05, 0.10, 0.18) * pow(1.0 - abs(rd.y), 6.0);
+  vec3 sd = normalize(rd) * 18.0;
+  vec3 cell = floor(sd);
+  float n = hash31(cell);
+  float threshold = 0.985;
+  float star = step(threshold, n);
+  float twinkle = 0.5 + 0.5 * sin(t * 2.0 + n * 50.0);
+  neb += star * twinkle * vec3(0.9, 0.95, 1.1) * max(0.0, rd.y + 0.1);
+  neb += 0.10 * pow(max(0.0, -rd.y), 4.0) * vec3(0.30, 0.10, 0.45);
+  return neb;
+}
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+  vec2 res = iResolution.xy;
+  vec2 ndc = (fragCoord - 0.5 * res) / min(res.x, res.y);
+  float t  = iTime;
+
+  Cam c = makeCamera(t);
+  vec3 rd = viewRay(c, ndc);
+
+  vec3 col3 = vec3(0.0);
+  vec3 bg = background(rd, t);
+  col3 = bg;
+
+  vec3 hit;
+  float floorDist;
+  bool hitFloor = castOntoFloor(c.ro, rd, hit, floorDist);
+  if (hitFloor) {
+    float spin  = t * 0.20;
+    vec2  cuv   = floorToCascadeUV(hit, spin);
+    vec3  floor3 = shadeFloor(cuv, hit, t);
+    float fade = exp(-floorDist * 0.05);
+    floor3 = mix(bg, floor3, clamp(fade, 0.0, 1.0));
+    col3 = floor3;
+  }
+
+  float pillar = pillarContribution(c.ro, rd, t);
+  col3 += vec3(0.55, 0.85, 1.0) * pillar * 1.6;
+
+  float ribbon = ribbonContribution(c.ro, rd, t);
+  col3 += vec3(0.20, 0.95, 0.78) * ribbon;
+
+  if (hitFloor) {
+    vec3 rdR = normalize(rd + 0.0015 * c.right);
+    vec3 rdB = normalize(rd - 0.0015 * c.right);
+    vec3 hR, hB; float dR, dB;
+    if (castOntoFloor(c.ro, rdR, hR, dR)) {
+      vec2 uvR = floorToCascadeUV(hR, t * 0.20);
+      int  bR  = (uvR.x >= 0.0 && uvR.x < float(W) && uvR.y >= 0.0 && uvR.y < float(H))
+                 ? rule30Bit(int(floor(uvR.y)), int(floor(uvR.x))) : 0;
+      col3.r += 0.06 * float(bR);
+    }
+    if (castOntoFloor(c.ro, rdB, hB, dB)) {
+      vec2 uvB = floorToCascadeUV(hB, t * 0.20);
+      int  bB  = (uvB.x >= 0.0 && uvB.x < float(W) && uvB.y >= 0.0 && uvB.y < float(H))
+                 ? rule30Bit(int(floor(uvB.y)), int(floor(uvB.x))) : 0;
+      col3.b += 0.06 * float(bB);
+    }
+  }
+
+  vec3 bright = max(col3 - 0.7, 0.0);
+  col3 += 0.6 * bright + 0.3 * bright * bright;
+
+  float vig = length(ndc) * 0.7;
+  col3 *= 1.0 - 0.30 * vig * vig;
+
+  col3 += 0.012 * (hash21(fragCoord + t) - 0.5);
+
+  col3 = col3 / (1.0 + col3);
+  col3 = pow(col3, vec3(0.85));
+
+  fragColor = vec4(col3, 1.0);
+}
+
+void main() {
+  vec4 c;
+  mainImage(c, gl_FragCoord.xy);
+  outColor = c;
+}`;
+
+function compile(type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(sh);
+    errBox.style.display = 'block';
+    errBox.textContent = (type === gl.VERTEX_SHADER ? 'Vertex shader: ' : 'Fragment shader: ') + log;
+    throw new Error(log);
+  }
+  return sh;
+}
+
+const vs = compile(gl.VERTEX_SHADER, vertSrc);
+const fs = compile(gl.FRAGMENT_SHADER, fragSrc);
+
+const prog = gl.createProgram();
+gl.attachShader(prog, vs); gl.attachShader(prog, fs);
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+  errBox.style.display = 'block';
+  errBox.textContent = 'Link: ' + gl.getProgramInfoLog(prog);
+  throw new Error(gl.getProgramInfoLog(prog));
+}
+gl.useProgram(prog);
+
+const vbo = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+const aPos = gl.getAttribLocation(prog, 'a_pos');
+gl.enableVertexAttribArray(aPos);
+gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+const uRes  = gl.getUniformLocation(prog, 'iResolution');
+const uTime = gl.getUniformLocation(prog, 'iTime');
+const uMouse = gl.getUniformLocation(prog, 'iMouse');
+
+let mouseState = [0, 0, 0, 0];
+canvas.addEventListener('mousemove', (e) => {
+  const r = canvas.getBoundingClientRect();
+  mouseState[0] = (e.clientX - r.left) * devicePixelRatio;
+  mouseState[1] = (r.height - (e.clientY - r.top)) * devicePixelRatio;
+});
+canvas.addEventListener('mousedown', () => mouseState[2] = mouseState[0]);
+canvas.addEventListener('mouseup',   () => mouseState[2] = -Math.abs(mouseState[2]));
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio, 2);
+  canvas.width  = Math.floor(window.innerWidth  * dpr);
+  canvas.height = Math.floor(window.innerHeight * dpr);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+window.addEventListener('resize', resize);
+resize();
+
+const t0 = performance.now();
+function frame() {
+  const t = (performance.now() - t0) * 0.001;
+  gl.uniform3f(uRes, canvas.width, canvas.height, 1.0);
+  gl.uniform1f(uTime, t);
+  gl.uniform4f(uMouse, mouseState[0], mouseState[1], mouseState[2], mouseState[3]);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>
